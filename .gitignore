@@ -1,0 +1,21 @@
+.env
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Raw 10-K HTML stays out of git — large, and fully regenerable from SEC
+# any time by re-running scripts/run_pipeline.py.
+data/raw_filings/*
+!data/raw_filings/.gitkeep
+
+# data/processed/ (risk memos, consistency checks, XBRL cache) and
+# data/chroma_db/ (embedded vectors) ARE committed deliberately, not
+# gitignored — Render serves /risk-memo and /consistency straight from
+# these cached files, and /query needs chroma_db present to retrieve
+# anything. Without this, a fresh deploy would 404 on everything until
+# someone re-ran the full pipeline (SEC + Groq calls) on the server itself,
+# which isn't necessary when the data's already generated locally.
+
+.DS_Store
+node_modules/

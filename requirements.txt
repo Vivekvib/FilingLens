@@ -1,0 +1,10 @@
+requests>=2.31
+beautifulsoup4>=4.12
+groq>=0.11
+sentence-transformers>=3.0
+chromadb>=0.5
+fastapi>=0.115
+uvicorn[standard]>=0.30
+pydantic>=2.7
+pytest>=8.0
+python-dotenv>=1.0

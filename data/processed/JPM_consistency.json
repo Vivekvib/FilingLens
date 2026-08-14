@@ -1,0 +1,57 @@
+{
+  "flags": [
+    {
+      "claim": "Net revenue was $78.5 billion, up 12%",
+      "ratio_evidence": "net_income_growth_pct: -2.43 (a decrease)",
+      "confidence": "high",
+      "grounded": true
+    },
+    {
+      "claim": "Banking & Payments revenue was $37.1 billion, up 5%",
+      "ratio_evidence": "revenue_growth_pct: 2.75 (an increase)",
+      "confidence": "high",
+      "grounded": true
+    },
+    {
+      "claim": "Investment Banking revenue was $10.2 billion, up 6%",
+      "ratio_evidence": "revenue_growth_pct: 2.75 (an increase)",
+      "confidence": "high",
+      "grounded": true
+    },
+    {
+      "claim": "Investment Banking fees were up 7%, driven by higher fees across products.",
+      "ratio_evidence": "no direct ratio evidence",
+      "confidence": "low",
+      "grounded": false
+    },
+    {
+      "claim": "Payments revenue was $19.3 billion, up 7%",
+      "ratio_evidence": "revenue_growth_pct: 2.75 (an increase)",
+      "confidence": "high",
+      "grounded": true
+    },
+    {
+      "claim": "Lending revenue was $7.6 billion, up 2%, driven by higher lending-related fees and lower fair value losses on credit protection purchased against certain retained loans and lending-related commitments.",
+      "ratio_evidence": "revenue_growth_pct: 2.75 (an increase)",
+      "confidence": "high",
+      "grounded": true
+    },
+    {
+      "claim": "Markets revenue was $35.8 billion, up 19%.",
+      "ratio_evidence": "no direct ratio evidence",
+      "confidence": "low",
+      "grounded": false
+    },
+    {
+      "claim": "Equity Markets revenue was $13.3 billion, up 33%, driven by higher revenue from IPOs.",
+      "ratio_evidence": "no direct ratio evidence",
+      "confidence": "low",
+      "grounded": false
+    }
+  ],
+  "assessment": "MD&A narrative in the excerpts overstates or lacks supporting evidence for at least five different revenue and growth claims across various segments and products.",
+  "computed_ratios": {
+    "revenue_growth_pct": 2.75,
+    "net_income_growth_pct": -2.43
+  }
+}

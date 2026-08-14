@@ -1,0 +1,36 @@
+{
+  "ticker": "MSFT",
+  "top_risks": [
+    {
+      "risk": "Regulatory Risk",
+      "summary": "The company may face regulatory challenges and scrutiny related to its data-handling practices, and reputational harm, which could impact its business, financial condition, and results of operations.",
+      "severity": "high"
+    },
+    {
+      "risk": "Acquisitions Integration Risk",
+      "summary": "The company may face challenges integrating and retaining employees, business systems, and technology from acquired companies, which could impact its operations, financial condition, and results of operations.",
+      "severity": "high"
+    },
+    {
+      "risk": "Intellectual Property Risks",
+      "summary": "The company may face risks related to the protection and utilization of its intellectual property, which could harm its business and operating results.",
+      "severity": "medium"
+    },
+    {
+      "risk": "Economic Conditions and Competition Risk",
+      "summary": "The company may face challenges due to changing economic and geopolitical conditions, and increased competition in its industry, which could impact its demand for software, services, and devices.",
+      "severity": "medium"
+    },
+    {
+      "risk": "Tax Liability Risk",
+      "summary": "The company may face additional tax liabilities due to changes in tax laws, regulations, and administrative practices, and tax authorities may disagree with its tax positions.",
+      "severity": "low"
+    }
+  ],
+  "management_tone": "The company is confident in its ability to evolve and adapt to a changing environment and expects to continue to generate revenue growth.",
+  "notable_flags": [
+    "Significant impairment of goodwill or intangibles due to failed acquisitions or transactions",
+    "Potential debarment or suspension as a governmental contractor",
+    "Significant tax liabilities or penalties"
+  ]
+}

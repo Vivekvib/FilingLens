@@ -1,0 +1,35 @@
+{
+  "ticker": "CRM",
+  "top_risks": [
+    {
+      "risk": "Geopolitical crises and catastrophic events",
+      "summary": "The company is exposed to disruption from geopolitical crises, natural disasters, and other catastrophic events, which could negatively impact demand for its services and its financial condition.",
+      "severity": "high"
+    },
+    {
+      "risk": "Climate change",
+      "summary": "Climate change may have an impact on the company's business, including increased operational costs, inflation risks, and the cost and availability of insurance.",
+      "severity": "medium"
+    },
+    {
+      "risk": "Security breaches",
+      "summary": "The company is at risk of security breaches and unauthorized access to its systems and customer data, which could disrupt its services and harm its reputation.",
+      "severity": "high"
+    },
+    {
+      "risk": "Attrition and loss of key talent",
+      "summary": "The company is subject to attrition, which is the reduction or loss of annualized value of its contracts with customers, and also risks the loss of key talent, which could impact its ability to operate effectively.",
+      "severity": "medium"
+    },
+    {
+      "risk": "Foreign currency fluctuations",
+      "summary": "The company's expanding global scope of business exposes it to fluctuations in foreign currency markets, which could impact its near-term results and earnings.",
+      "severity": "medium"
+    }
+  ],
+  "management_tone": "We expect to continue to experience improvements in our operating expenses as a percentage of revenue, and we are well-positioned for long-term sustainable growth.",
+  "notable_flags": [
+    "Loss of invested capital in our strategic investment portfolio",
+    "Discontinuance of third-party developers and vendors in embracing our technology delivery model"
+  ]
+}

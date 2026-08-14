@@ -1,0 +1,21 @@
+# Slim requirements for the RENDER deployment specifically — NOT the same
+# as the root requirements.txt used for local development.
+#
+# /companies, /risk-memo, and /consistency only read cached JSON files and
+# never touch the embedding/vector-store stack. Only /query needs
+# sentence-transformers + chromadb, and installing those on a memory-
+# constrained free tier was causing OOM kills (PyTorch's default Linux
+# wheel bundles the full CUDA toolkit — several GB — even though there's
+# no GPU to use it on).
+#
+# Deploying with this file means /query gracefully returns a 503 in
+# production (see the try/except in src/api/main.py's ad_hoc_query) while
+# the other 3 endpoints — the ones actually serving the demo's real
+# content — stay lightweight and reliable. Run locally with the full
+# requirements.txt to use /query and to run the pipeline.
+
+groq>=0.11
+fastapi>=0.115
+uvicorn[standard]>=0.30
+pydantic>=2.7
+python-dotenv>=1.0

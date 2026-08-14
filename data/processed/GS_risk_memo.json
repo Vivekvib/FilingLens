@@ -1,0 +1,32 @@
+{
+  "ticker": "GS",
+  "top_risks": [
+    {
+      "risk": "Model Risk and Limitations",
+      "summary": "The company's risk models and hedging strategies may not anticipate or effectively mitigate losses due to unprecedented market dislocations and correlations.",
+      "severity": "high"
+    },
+    {
+      "risk": "Regulatory Intervention and Compliance",
+      "summary": "The company is subject to extensive and pervasive regulation, and failure to comply with laws and regulations may result in fines, losses, and reputational harm.",
+      "severity": "high"
+    },
+    {
+      "risk": "Interest Rate Risk and VaR",
+      "summary": "The company's interest rate risk exposure may not be adequately managed, and potential losses may exceed expected values due to changes in market rates and assumptions.",
+      "severity": "medium"
+    },
+    {
+      "risk": "Geopolitical and Economic Uncertainty",
+      "summary": "Market volatility and the prospect of an economic recession in the U.S. and globally may impact the company's business operations and profitability.",
+      "severity": "medium"
+    },
+    {
+      "risk": "Fair Value Measurement and Model Judgments",
+      "summary": "The company's fair value measurements may be influenced by subjective judgments and model inputs, which may affect the accuracy of financial reporting and risk assessments.",
+      "severity": "low"
+    }
+  ],
+  "management_tone": "Management expresses confidence in the company's risk management practices, but acknowledges the need for ongoing adaptation and monitoring.",
+  "notable_flags": []
+}

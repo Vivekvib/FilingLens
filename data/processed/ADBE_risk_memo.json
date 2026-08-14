@@ -1,0 +1,40 @@
+{
+  "ticker": "ADBE",
+  "top_risks": [
+    {
+      "risk": "Global Economic Downturn",
+      "summary": "The company is subject to risks and exposures from the evolving macroeconomic environment, including increased global inflationary pressures and interest rates, economic slowdowns or recessions, and geopolitical pressures.",
+      "severity": "high"
+    },
+    {
+      "risk": "Reputation Damage",
+      "summary": "The company is vulnerable to brand or reputational harm associated with its acquisitions, investments, or other strategic transactions, which may expose it to liability and damage its reputation.",
+      "severity": "high"
+    },
+    {
+      "risk": "Supply Chain Disruption",
+      "summary": "The company faces risks associated with the unavailability or delayed delivery of critical services, products, or technologies from third-party providers, which may be impacted by macroeconomic conditions, trade restrictions, or other factors.",
+      "severity": "high"
+    },
+    {
+      "risk": "Key Talent Retention",
+      "summary": "The company may struggle to retain key personnel, particularly in areas with high demand for skilled employees, which may harm its business and financial results.",
+      "severity": "medium"
+    },
+    {
+      "risk": "System Failures",
+      "summary": "The company's reliance on third-party service providers and its hybrid work environment may expose it to risks of system failures, data breaches, or other technology-related disruptions.",
+      "severity": "medium"
+    }
+  ],
+  "management_tone": "Although we experienced revenue growth of 11% in fiscal 2025, we are cautious about the potential impact of macroeconomic trends and uncertainty on our business and financial results in the long term.",
+  "notable_flags": [
+    "The company's recent experience with termination of acquisition and regulatory issues may lead to additional costs and difficulties in obtaining regulatory approvals."
+  ],
+  "flags_details": [
+    {
+      "flag": "termination of acquisition, regulatory issues",
+      "details": "The company has experienced difficulties in obtaining regulatory approvals, resulting in the termination of a previously announced acquisition and the incurrence of additional costs."
+    }
+  ]
+}

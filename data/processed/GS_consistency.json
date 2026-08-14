@@ -1,0 +1,38 @@
+{
+  "flags": [
+    {
+      "claim": "We manage EaR with a goal to reduce potential volatility resulting from changes in interest rates so it remains within our EaR risk appetite. Our EaR scenario is regularly evaluated and updated, if necessary, to reflect changes in our business plans, market conditions and other macroeconomic factors.",
+      "ratio_evidence": "The actual performance of EaR is indicated by net_income_growth_pct, which indicates a significant 20.31% increase, not a reduction.",
+      "confidence": "high",
+      "grounded": true
+    },
+    {
+      "claim": "The net benefit for 2025 reflected a net release related to the Apple Card loan portfolio (including a reserve reduction of $2.48 billion related to the transfer of the Apple Card loans to held for sale, partially offset by net charge-offs during the year). Provisions for 2024 reflected net provisions related to the credit card portfolio (primarily driven by net charge-offs). Provision for credit losses in the consolidated statements of earnings was a net benefit of $1.11 billion for 2025, compared with net provisions of $1.35 billion for 2024.",
+      "ratio_evidence": "net_income_growth_pct: 20.31 (an increase)",
+      "confidence": "high",
+      "grounded": true
+    },
+    {
+      "claim": "operating expenses Our operating expenses are primarily influenced by compensation, headcount and levels of business activity. Compensation and benefits includes salaries, year-end discretionary compensation, amortization of equity awards and other items, such as benefits.",
+      "ratio_evidence": "no matching entry in COMPUTED FINANCIAL RATIOS",
+      "confidence": "low",
+      "grounded": false
+    },
+    {
+      "claim": "Investment banking fees includes the following: \u2022 Advisory. Includes strategic advisory assignments with respect to mergers and acquisitions, divestitures, corporate defense activities, restructurings and spin-offs. \u2022 Underwriting. Includes public offerings and private placements in both local and cross-border transactions of a wide range of securities and other financial instruments, as detailed below. (No actual computed ratio evidence provided that matches 'investment banking fees').",
+      "ratio_evidence": "no matching entry in COMPUTED FINANCIAL RATIOS",
+      "confidence": "low",
+      "grounded": false
+    },
+    {
+      "claim": "Provisions for 2024 reflected net provisions related to the credit card portfolio (primarily driven by net charge-offs). Provisions for 2023 reflected net provisions related to both the credit card portfolio (primarily driven by net charge-offs) and wholesale loans (primarily driven by impairments), partially offset by reserve reductions of $637 million related to the transfer of the GreenSky loan portfolio to held for sale and $442 million related to the sale of substantially all of the Marcus loan portfolio. Provision for credit losses in the consolidated statements of earnings was $1.35 billion for 2024, compared with $1.03 billion for 2023.",
+      "ratio_evidence": "net_income_growth_pct: 20.31 (an increase)",
+      "confidence": "high",
+      "grounded": true
+    }
+  ],
+  "assessment": "Despite highlighting several areas of performance increase or stability, the narrative often lacks specificity and may overstate the actual financial outcomes, while in other instances it fails to accurately capture the direction or magnitude of certain financial metrics.",
+  "computed_ratios": {
+    "net_income_growth_pct": 20.31
+  }
+}

@@ -1,0 +1,46 @@
+{
+  "flags": [
+    {
+      "claim": "Microsoft Cloud revenue increased 27%",
+      "ratio_evidence": "operating_income_growth_pct: 20.78 (an increase, but less than claimed)",
+      "confidence": "medium",
+      "grounded": true
+    },
+    {
+      "claim": "Azure and other cloud services revenue increased 41%",
+      "ratio_evidence": "cost_of_revenue_growth_pct: 4.52 (an increase, but less than claimed)",
+      "confidence": "medium",
+      "grounded": true
+    },
+    {
+      "claim": "LinkedIn revenue increased 11%",
+      "ratio_evidence": "no direct correlation, skip due to metric not listed in COMPUTED FINANCIAL RATIOS",
+      "confidence": "low",
+      "grounded": false
+    },
+    {
+      "claim": "Windows OEM and Devices revenue decreased slightly",
+      "ratio_evidence": "no direct correlation, skip due to metric not listed in COMPUTED FINANCIAL RATIOS",
+      "confidence": "low",
+      "grounded": false
+    },
+    {
+      "claim": "XBOX content and services revenue decreased 5%",
+      "ratio_evidence": "no direct correlation, skip due to metric not listed in COMPUTED FINANCIAL RATIOS",
+      "confidence": "low",
+      "grounded": false
+    },
+    {
+      "claim": "Search advertising (formerly Search and news advertising) revenue excluding traffic acquisition costs increased 12%",
+      "ratio_evidence": "no direct correlation, skip due to metric not listed in COMPUTED FINANCIAL RATIOS",
+      "confidence": "low",
+      "grounded": false
+    }
+  ],
+  "assessment": "While some minor discrepancies are present, the overall narrative provided by Microsoft's MD&A largely aligns with the computed financial ratios, suggesting a generally truthful representation of their financials.",
+  "computed_ratios": {
+    "net_income_growth_pct": 31.34,
+    "operating_income_growth_pct": 20.78,
+    "cost_of_revenue_growth_pct": 4.52
+  }
+}

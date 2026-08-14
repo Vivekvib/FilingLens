@@ -1,0 +1,68 @@
+{
+  "flags": [
+    {
+      "claim": "gross profit was up 17% year over year",
+      "ratio_evidence": "revenue_growth_pct: 0.3 (a small increase)",
+      "confidence": "low",
+      "grounded": true
+    },
+    {
+      "claim": "gross margin expanded by more favorable economics in Cash App's financial services-related products",
+      "ratio_evidence": "gross_margin_by_year: 2025's margin was 42.82, a 5.97 points increase over 2024",
+      "confidence": "low",
+      "grounded": false
+    },
+    {
+      "claim": "operating income was $1.7 billion and Adjusted Operating Income was $2.1 billion, compared to operating income of $892.3 million and Adjusted Operating Income of $1.6 billion in 2024",
+      "ratio_evidence": "operating_income_growth_pct: 91.46 (a large increase)",
+      "confidence": "high",
+      "grounded": true
+    },
+    {
+      "claim": "Net income attributable to common stockholders was $1.3 billion compared to net income attributable to common stockholders of $2.9 billion for the same period in 2024",
+      "ratio_evidence": "net_income_growth_pct: -54.93 (a large decrease)",
+      "confidence": "high",
+      "grounded": true
+    },
+    {
+      "claim": "Total cost of revenue $13.8 billion in 2025, down 9% from 2024",
+      "ratio_evidence": "cost_of_revenue_growth_pct: -9.18 (a large decrease, supporting MD&A claim but not quantitatively matching)",
+      "confidence": "high",
+      "grounded": true
+    },
+    {
+      "claim": "Operating Expenses increased 8%",
+      "ratio_evidence": "operating_expenses are not explicitly calculated or given in the COMPUTED_FINANCIAL_RATIOS, so skipped this claim",
+      "confidence": "low",
+      "grounded": false
+    },
+    {
+      "claim": "Operating Expenses (in thousands, except for percentages) Year Ended December 31, 2025 2024 $ Change % Change Product development $ 2,907,889 $ 2,914,415 $ (6,526) \u2014 %",
+      "ratio_evidence": "operating_expenses are not explicitly calculated or given in the COMPUTED_FINANCIAL_RATIOS, so skipped this claim",
+      "confidence": "low",
+      "grounded": false
+    }
+  ],
+  "assessment": "The narratives in the MD&A occasionally conflict with or overstate actual computed financial ratios.",
+  "computed_ratios": {
+    "revenue_growth_pct": 0.3,
+    "gross_margin_delta_pts": 5.97,
+    "gross_margin_by_year": [
+      {
+        "fy": 2025,
+        "margin_pct": 42.82
+      },
+      {
+        "fy": 2024,
+        "margin_pct": 36.85
+      },
+      {
+        "fy": 2023,
+        "margin_pct": 34.24
+      }
+    ],
+    "net_income_growth_pct": -54.93,
+    "operating_income_growth_pct": 91.46,
+    "cost_of_revenue_growth_pct": -9.18
+  }
+}

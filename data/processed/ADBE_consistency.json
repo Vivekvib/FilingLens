@@ -1,0 +1,68 @@
+{
+  "flags": [
+    {
+      "claim": "11.5% year-over-year growth in revenue",
+      "ratio_evidence": "revenue_growth_pct: 10.53 (an increase)",
+      "confidence": "low",
+      "grounded": true
+    },
+    {
+      "claim": "11% increase in Digital Media revenue",
+      "ratio_evidence": "cost_of_revenue_growth_pct indicates 8.18% increase in cost of revenue, not revenue growth, though revenue growth could be higher, so '11%' seems overstatement without explicit revenue breakdown to compare",
+      "confidence": "medium",
+      "grounded": true
+    },
+    {
+      "claim": "9% increase in Digital Experience revenue",
+      "ratio_evidence": "missing ratio, no computed revenue metrics match digital experience, so flagging impossible",
+      "confidence": "low",
+      "grounded": false
+    },
+    {
+      "claim": "8% increase in cost of revenue",
+      "ratio_evidence": "cost_of_revenue_growth_pct: 8.18 (an increase)",
+      "confidence": "high",
+      "grounded": true
+    },
+    {
+      "claim": "operating expenses remained relatively flat",
+      "ratio_evidence": "operating_income_growth_pct: 29.15 (an increase), not flat and no flat or negative 'operating expenses' or ratio available to compare with in COMPUTED FINANCIAL RATIOS",
+      "confidence": "low",
+      "grounded": true
+    },
+    {
+      "claim": "$460 million higher ARR revalued at currency rates (vs $460 million)  ending ARR at the end of fiscal 2025 ",
+      "ratio_evidence": "revenue_growth_pct indicates revenue increase not matching $460 million delta; also ARR not explicitly broken out in COMPUTED FINANCIAL RATIOS for direct comparison",
+      "confidence": "medium",
+      "grounded": true
+    },
+    {
+      "claim": "net income increased by 28%",
+      "ratio_evidence": "net_income_growth_pct: 28.24 (an increase)",
+      "confidence": "high",
+      "grounded": true
+    }
+  ],
+  "assessment": "While some minor discrepancies exist, overall alignment of MD&A narrative and actual financial metrics remains relatively high.",
+  "computed_ratios": {
+    "revenue_growth_pct": 10.53,
+    "gross_margin_delta_pts": 0.23,
+    "gross_margin_by_year": [
+      {
+        "fy": 2025,
+        "margin_pct": 89.27
+      },
+      {
+        "fy": 2024,
+        "margin_pct": 89.04
+      },
+      {
+        "fy": 2023,
+        "margin_pct": 87.87
+      }
+    ],
+    "net_income_growth_pct": 28.24,
+    "operating_income_growth_pct": 29.15,
+    "cost_of_revenue_growth_pct": 8.18
+  }
+}

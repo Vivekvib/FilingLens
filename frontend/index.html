@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<!--
+  FilingLens frontend. Single-file vanilla HTML/CSS/JS on purpose — no
+  build step needed, ships fast, and still reads as a deliberate research
+  tool rather than a generic dashboard. If this project grows past a
+  2-day build, this is the natural point to migrate to a proper frontend
+  framework, but that wasn't worth the setup cost here.
+
+  Wires up to the FastAPI backend at API_BASE below:
+    GET  /companies
+    GET  /risk-memo/{ticker}
+    GET  /consistency/{ticker}
+    POST /query
+
+  Design concept: a "case file" — a docket of companies on the left, an
+  analyst memo on the right, styled after the actual visual vocabulary of
+  SEC filings (letterheads, dockets, filing stamps) rather than a generic
+  SaaS dashboard. Consistency-check flags render as literal stamp badges
+  (VERIFIED / UNVERIFIED) keyed off the backend's "grounded" field — see
+  src/agent/consistency_checker.py::_enforce_grounding.
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>FilingLens — Financial Filings Intelligence</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Spectral:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+
+  :root {
+    --ink: #14171F;
+    --ink-soft: #3B3E46;
+    --paper: #F2F0E9;
+    --paper-card: #FBFAF6;
+    --line: #C9C4B4;
+    --muted: #6B6A61;
+
+    --verified: #2F6F62;
+    --verified-bg: #E4EEEA;
+    --flag: #B23A2F;
+    --flag-bg: #F5E6E2;
+    --amber: #B8862B;
+    --amber-bg: #F5EBD9;
+
+    --font-display: 'Spectral', Georgia, serif;
+    --font-body: 'Inter', -apple-system, sans-serif;
+    --font-mono: 'IBM Plex Mono', 'Courier New', monospace;
+
+    --radius: 3px;
+  }
+
+  * { box-sizing: border-box; }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.001ms !important;
+      transition-duration: 0.001ms !important;
+    }
+  }
+
+  html, body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--font-body);
+    font-size: 15px;
+    line-height: 1.5;
+  }
+
+  a { color: inherit; }
+
+  button, input {
+    font-family: inherit;
+    font-size: inherit;
+  }
+
+  /* ── Focus visibility — never remove this, only restyle it ────────── */
+  :focus-visible {
+    outline: 2px solid var(--ink);
+    outline-offset: 2px;
+  }
+
+  /* ── App shell ──────────────────────────────────────────────────── */
+  .app-header {
+    border-bottom: 1px solid var(--line);
+    padding: 18px 24px;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .app-title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.3rem;
+    letter-spacing: 0.01em;
+  }
+
+  .app-subtitle {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+
+  .layout {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    min-height: calc(100vh - 64px);
+  }
+
+  @media (max-width: 720px) {
+    .layout { grid-template-columns: 1fr; }
+    .docket { border-right: none; border-bottom: 1px solid var(--line); }
+    .docket-list { display: flex; overflow-x: auto; }
+    .docket-item { border-bottom: none; border-right: 1px solid var(--line); white-space: nowrap; }
+  }
+
+  /* ── Docket (left rail) ─────────────────────────────────────────── */
+  .docket {
+    border-right: 1px solid var(--line);
+    background: var(--paper-card);
+  }
+
+  .docket-label {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    padding: 14px 16px 8px;
+  }
+
+  .docket-item {
+    display: block;
+    width: 100%;
+    text-align: left;
+    background: none;
+    border: none;
+    border-bottom: 1px solid var(--line);
+    padding: 10px 16px;
+    cursor: pointer;
+    transition: background-color 0.15s ease;
+  }
+
+  .docket-item:hover { background: var(--paper); }
+
+  .docket-item.active {
+    background: var(--ink);
+    color: var(--paper-card);
+  }
+
+  .docket-ticker {
+    font-family: var(--font-mono);
+    font-weight: 600;
+    font-size: 0.85rem;
+    display: block;
+  }
+
+  .docket-name {
+    font-size: 0.75rem;
+    color: var(--muted);
+    display: block;
+    margin-top: 2px;
+  }
+
+  .docket-item.active .docket-name { color: #C9C6BC; }
+
+  .docket-sector {
+    display: inline-block;
+    margin-top: 5px;
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 1px 6px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    color: var(--muted);
+  }
+
+  .docket-item.active .docket-sector { border-color: #4A4D55; color: #C9C6BC; }
+
+  /* ── Memo panel (right) ─────────────────────────────────────────── */
+  .memo {
+    padding: 28px 36px 60px;
+    max-width: 780px;
+  }
+
+  .memo-empty, .memo-error {
+    padding: 60px 36px;
+    color: var(--muted);
+    font-style: italic;
+  }
+
+  .memo-letterhead {
+    border-bottom: 2px solid var(--ink);
+    padding-bottom: 14px;
+    margin-bottom: 22px;
+  }
+
+  .memo-company {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1.6rem;
+  }
+
+  .memo-meta {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-top: 4px;
+  }
+
+  .section-label {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 6px;
+    margin: 26px 0 12px;
+  }
+
+  .memo-tone {
+    font-style: italic;
+    color: var(--ink-soft);
+  }
+
+  /* ── Risks ──────────────────────────────────────────────────────── */
+  .risk-list { list-style: none; margin: 0; padding: 0; counter-reset: risk-counter; }
+
+  .risk-item {
+    counter-increment: risk-counter;
+    display: flex;
+    gap: 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .risk-item:last-child { border-bottom: none; }
+
+  .risk-item::before {
+    content: counter(risk-counter);
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--muted);
+    flex-shrink: 0;
+    width: 1.4em;
+  }
+
+  .risk-body { flex: 1; }
+
+  .risk-title {
+    font-weight: 600;
+    display: inline;
+  }
+
+  .severity-badge {
+    display: inline-block;
+    margin-left: 8px;
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 1px 6px;
+    border-radius: var(--radius);
+    vertical-align: middle;
+  }
+
+  .severity-high { background: var(--flag-bg); color: var(--flag); }
+  .severity-medium { background: var(--amber-bg); color: var(--amber); }
+  .severity-low { background: var(--paper); color: var(--muted); border: 1px solid var(--line); }
+
+  .risk-summary {
+    display: block;
+    color: var(--ink-soft);
+    font-size: 0.92rem;
+    margin-top: 2px;
+  }
+
+  .notable-flags {
+    margin: 0;
+    padding-left: 18px;
+    color: var(--ink-soft);
+    font-size: 0.9rem;
+  }
+
+  /* ── Consistency check ──────────────────────────────────────────── */
+  .ratio-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 14px;
+  }
+
+  .ratio-chip {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    background: var(--paper-card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 3px 8px;
+  }
+
+  .ratio-chip .val-pos { color: var(--verified); }
+  .ratio-chip .val-neg { color: var(--flag); }
+
+  .consistency-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr auto;
+    gap: 14px;
+    align-items: start;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--line);
+  }
+
+  @media (max-width: 640px) {
+    .consistency-row { grid-template-columns: 1fr; }
+  }
+
+  .consistency-row:last-child { border-bottom: none; }
+
+  .consistency-claim { font-size: 0.92rem; }
+  .consistency-evidence {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    color: var(--muted);
+  }
+
+  .stamp {
+    font-family: var(--font-mono);
+    font-weight: 600;
+    font-size: 0.68rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 4px 9px;
+    border: 2px dashed;
+    border-radius: var(--radius);
+    white-space: nowrap;
+    justify-self: end;
+  }
+
+  .stamp-verified {
+    color: var(--verified);
+    border-color: var(--verified);
+    transform: rotate(-3deg);
+  }
+
+  .stamp-unverified {
+    color: var(--flag);
+    border-color: var(--flag);
+    transform: rotate(2deg);
+  }
+
+  .consistency-assessment {
+    margin-top: 16px;
+    padding: 12px 14px;
+    background: var(--paper-card);
+    border-left: 3px solid var(--ink);
+    font-size: 0.9rem;
+    color: var(--ink-soft);
+  }
+
+  /* ── Query box ──────────────────────────────────────────────────── */
+  .query-box {
+    margin-top: 30px;
+    padding-top: 18px;
+    border-top: 2px solid var(--ink);
+  }
+
+  .query-form {
+    display: flex;
+    gap: 8px;
+  }
+
+  .query-input {
+    flex: 1;
+    padding: 9px 12px;
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--paper-card);
+    color: var(--ink);
+  }
+
+  .query-submit {
+    padding: 9px 16px;
+    border: 1px solid var(--ink);
+    border-radius: var(--radius);
+    background: var(--ink);
+    color: var(--paper-card);
+    cursor: pointer;
+    font-weight: 500;
+  }
+
+  .query-submit:disabled {
+    opacity: 0.5;
+    cursor: default;
+  }
+
+  .query-answer {
+    margin-top: 14px;
+    padding: 14px;
+    background: var(--paper-card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    font-size: 0.92rem;
+  }
+
+  .query-sources {
+    margin-top: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+  }
+
+  .source-chip {
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    color: var(--muted);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 1px 6px;
+  }
+
+</style>
+</head>
+<body>
+
+<header class="app-header">
+  <div class="app-title">FilingLens</div>
+  <div class="app-subtitle">Financial Filings Intelligence — Agentic RAG over SEC 10-Ks</div>
+</header>
+
+<div class="layout">
+  <nav class="docket" aria-label="Company docket">
+    <div class="docket-label">Docket</div>
+    <div class="docket-list" id="docket-list"></div>
+  </nav>
+
+  <main class="memo" id="memo" aria-live="polite">
+    <div class="memo-empty">Select a filing from the docket to open its memo.</div>
+  </main>
+</div>
+
+<script>
+  // Auto-detects local vs. deployed so the same file works in both places
+  // without manual edits. Update RENDER_API_URL once after deploying the
+  // backend to Render — everything else adapts automatically.
+  const RENDER_API_URL = "https://filinglens-api.onrender.com"; // <-- replace with your actual Render URL after deploy
+  const isLocal = location.hostname === "localhost" || location.hostname === "127.0.0.1" || location.protocol === "file:";
+  const API_BASE = isLocal ? "http://127.0.0.1:8000" : RENDER_API_URL;
+
+  const docketList = document.getElementById("docket-list");
+  const memo = document.getElementById("memo");
+  let activeTicker = null;
+  let companiesCache = [];
+
+  function escapeHtml(str) {
+    const div = document.createElement("div");
+    div.textContent = str ?? "";
+    return div.innerHTML;
+  }
+
+  function formatRatioValue(key, val) {
+    if (typeof val !== "number") return escapeHtml(String(val));
+    const cls = val >= 0 ? "val-pos" : "val-neg";
+    const sign = val > 0 ? "+" : "";
+    return `<span class="${cls}">${sign}${val}%</span>`;
+  }
+
+  async function fetchJSON(path) {
+    const res = await fetch(`${API_BASE}${path}`);
+    if (!res.ok) {
+      const body = await res.json().catch(() => ({}));
+      const err = new Error(body.detail || `Request failed (${res.status})`);
+      err.status = res.status;
+      throw err;
+    }
+    return res.json();
+  }
+
+  async function loadCompanies() {
+    try {
+      companiesCache = await fetchJSON("/companies");
+    } catch (e) {
+      docketList.innerHTML = `<div class="memo-error" style="padding:16px;">Can't reach the API at ${API_BASE} — is uvicorn running?</div>`;
+      return;
+    }
+
+    docketList.innerHTML = "";
+    companiesCache.forEach(c => {
+      const btn = document.createElement("button");
+      btn.className = "docket-item";
+      btn.setAttribute("data-ticker", c.ticker);
+      btn.innerHTML = `
+        <span class="docket-ticker">${escapeHtml(c.ticker)}</span>
+        <span class="docket-name">${escapeHtml(c.name)}</span>
+        <span class="docket-sector">${escapeHtml(c.sector)}</span>
+      `;
+      btn.addEventListener("click", () => selectCompany(c.ticker));
+      docketList.appendChild(btn);
+    });
+
+    if (companiesCache.length > 0) {
+      selectCompany(companiesCache[0].ticker);
+    }
+  }
+
+  async function selectCompany(ticker) {
+    activeTicker = ticker;
+    document.querySelectorAll(".docket-item").forEach(el => {
+      el.classList.toggle("active", el.getAttribute("data-ticker") === ticker);
+    });
+
+    memo.innerHTML = `<div class="memo-empty">Opening ${escapeHtml(ticker)}'s file…</div>`;
+
+    const companyInfo = companiesCache.find(c => c.ticker === ticker) || {};
+
+    let riskMemo, consistency;
+    try {
+      [riskMemo, consistency] = await Promise.all([
+        fetchJSON(`/risk-memo/${ticker}`),
+        fetchJSON(`/consistency/${ticker}`).catch(() => null), // consistency check may not exist for every company — degrade gracefully
+      ]);
+    } catch (e) {
+      memo.innerHTML = `<div class="memo-error">${escapeHtml(e.message)}</div>`;
+      return;
+    }
+
+    renderMemo(companyInfo, riskMemo, consistency);
+  }
+
+  function renderMemo(companyInfo, riskMemo, consistency) {
+    const risksHtml = (riskMemo.top_risks || []).map(r => `
+      <li class="risk-item">
+        <div class="risk-body">
+          <span class="risk-title">${escapeHtml(r.risk)}</span>
+          <span class="severity-badge severity-${escapeHtml(r.severity)}">${escapeHtml(r.severity)}</span>
+          <span class="risk-summary">${escapeHtml(r.summary)}</span>
+        </div>
+      </li>
+    `).join("");
+
+    const flagsHtml = (riskMemo.notable_flags || []).length
+      ? `<ul class="notable-flags">${riskMemo.notable_flags.map(f => `<li>${escapeHtml(f)}</li>`).join("")}</ul>`
+      : "";
+
+    let consistencyHtml = "";
+    if (consistency === null) {
+      consistencyHtml = `<div class="section-label">Consistency Check</div><p style="color:var(--muted); font-style:italic;">No consistency check on file for this company yet.</p>`;
+    } else {
+      const ratioChips = Object.entries(consistency.computed_ratios || {})
+        .filter(([k]) => !k.endsWith("_by_year"))
+        .map(([k, v]) => `<span class="ratio-chip">${escapeHtml(k)}: ${formatRatioValue(k, v)}</span>`)
+        .join("");
+
+      const rows = (consistency.flags || []).map(f => {
+        const stampClass = f.grounded ? "stamp-verified" : "stamp-unverified";
+        const stampLabel = f.grounded ? "Verified" : "Unverified";
+        return `
+          <div class="consistency-row">
+            <div class="consistency-claim">${escapeHtml(f.claim)}</div>
+            <div class="consistency-evidence">${escapeHtml(f.ratio_evidence)}</div>
+            <div class="stamp ${stampClass}">${stampLabel} · ${escapeHtml(f.confidence)}</div>
+          </div>
+        `;
+      }).join("");
+
+      consistencyHtml = `
+        <div class="section-label">Consistency Check — Narrative vs. Reported Financials</div>
+        <div class="ratio-chips">${ratioChips || '<span style="color:var(--muted); font-size:0.85rem;">No ratios could be computed for this company.</span>'}</div>
+        ${rows || '<p style="color:var(--muted); font-style:italic;">No flags raised against the computed ratios.</p>'}
+        <div class="consistency-assessment">${escapeHtml(consistency.assessment || "")}</div>
+      `;
+    }
+
+    memo.innerHTML = `
+      <div class="memo-letterhead">
+        <div class="memo-company">${escapeHtml(companyInfo.name || riskMemo.ticker)}</div>
+        <div class="memo-meta">${escapeHtml(riskMemo.ticker)} · CIK ${escapeHtml(companyInfo.cik || "—")} · ${escapeHtml(companyInfo.sector || "")}</div>
+      </div>
+
+      ${riskMemo.management_tone ? `
+        <div class="section-label">Management Tone</div>
+        <p class="memo-tone">"${escapeHtml(riskMemo.management_tone)}"</p>
+      ` : ""}
+
+      <div class="section-label">Top Risks</div>
+      <ol class="risk-list">${risksHtml}</ol>
+      ${flagsHtml}
+
+      ${consistencyHtml}
+
+      <div class="query-box">
+        <div class="section-label" style="border-bottom:none; margin-bottom:8px;">Ask a Question</div>
+        <form class="query-form" id="query-form">
+          <input type="text" class="query-input" id="query-input"
+                 placeholder="e.g. What does the filing say about regulatory risk?" required />
+          <button type="submit" class="query-submit" id="query-submit">Ask</button>
+        </form>
+        <div id="query-result"></div>
+      </div>
+    `;
+
+    document.getElementById("query-form").addEventListener("submit", handleQuery);
+  }
+
+  async function handleQuery(evt) {
+    evt.preventDefault();
+    const input = document.getElementById("query-input");
+    const submitBtn = document.getElementById("query-submit");
+    const resultBox = document.getElementById("query-result");
+    const question = input.value.trim();
+    if (!question || !activeTicker) return;
+
+    submitBtn.disabled = true;
+    submitBtn.textContent = "Asking…";
+    resultBox.innerHTML = "";
+
+    try {
+      const res = await fetch(`${API_BASE}/query`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ticker: activeTicker, question }),
+      });
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({}));
+        throw new Error(body.detail || `Request failed (${res.status})`);
+      }
+      const data = await res.json();
+
+      const sourcesHtml = (data.sources || [])
+        .map(s => `<span class="source-chip">${escapeHtml(s.section)} · FY ${escapeHtml(s.fiscal_year)}</span>`)
+        .join("");
+
+      resultBox.innerHTML = `
+        <div class="query-answer">
+          ${escapeHtml(data.answer)}
+          ${sourcesHtml ? `<div class="query-sources">${sourcesHtml}</div>` : ""}
+        </div>
+      `;
+    } catch (e) {
+      resultBox.innerHTML = `<div class="query-answer" style="color:var(--flag);">Couldn't get an answer: ${escapeHtml(e.message)}</div>`;
+    } finally {
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Ask";
+      input.value = "";
+    }
+  }
+
+  loadCompanies();
+</script>
+
+</body>
+</html>

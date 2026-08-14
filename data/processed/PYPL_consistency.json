@@ -1,0 +1,34 @@
+{
+  "flags": [
+    {
+      "claim": "Operating income increased $740 million, or 14%, in 2025 compared to 2024",
+      "ratio_evidence": "operating_income_growth_pct: -13.9 (a decrease)",
+      "confidence": "high",
+      "grounded": true
+    },
+    {
+      "claim": "Net income increased $1.1 billion, or 26%, in 2025 compared to 2024",
+      "ratio_evidence": "net_income_growth_pct: 26.19 (an increase)",
+      "confidence": "low",
+      "grounded": true
+    },
+    {
+      "claim": "Transaction and credit losses increased $278 million, or 19%, in 2025 compared to 2024",
+      "ratio_evidence": "no direct comparison available (transaction and credit losses not a computed ratio)",
+      "confidence": "low",
+      "grounded": false
+    },
+    {
+      "claim": "Transaction revenues growth was lower than the growth in TPV in 2025 due to changes in product mix, merchant mix, and unfavorable impact from foreign exchange hedging activities",
+      "ratio_evidence": "revenue_growth_pct: 4.32, TPV_growth_pct: 7 (increase), revenue not directly available but TPV outpaced revenue growth",
+      "confidence": "medium",
+      "grounded": true
+    }
+  ],
+  "assessment": "The narrative provided in the MD&A contains some misstatements, specifically the claim that operating income increased 14% and that net income increased 26%.",
+  "computed_ratios": {
+    "revenue_growth_pct": 4.32,
+    "net_income_growth_pct": 26.19,
+    "operating_income_growth_pct": 13.9
+  }
+}

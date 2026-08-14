@@ -1,0 +1,26 @@
+{
+  "net_income": [
+    {
+      "fy": 2025,
+      "end": "2025-12-31",
+      "val": 17176000000
+    },
+    {
+      "fy": 2024,
+      "end": "2024-12-31",
+      "val": 14276000000
+    },
+    {
+      "fy": 2023,
+      "end": "2023-12-31",
+      "val": 8516000000
+    }
+  ],
+  "_unresolved": [
+    "revenue",
+    "gross_profit",
+    "operating_income",
+    "cost_of_revenue"
+  ],
+  "_ticker": "GS"
+}

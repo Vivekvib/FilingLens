@@ -1,0 +1,46 @@
+{
+  "flags": [
+    {
+      "claim": "cost of revenue growth was 5% higher in 2025 compared to 2024",
+      "ratio_evidence": "cost_of_revenue_growth_pct: 5.04 (an increase, not growth being \"higher\")",
+      "confidence": "low",
+      "grounded": true
+    },
+    {
+      "claim": "gross margins will be subject to volatility and downward pressure",
+      "ratio_evidence": "Products gross margin percentage increased from 36.5% in 2023 to 36.8% in 2025 and Services gross margin percentage increased from 70.8% to 75.4%",
+      "confidence": "low",
+      "grounded": false
+    },
+    {
+      "claim": "operating expenses for 2025 increased 8% compared to 2024",
+      "ratio_evidence": "operating_income_growth_pct: 7.98 and is an increase, Total operating expenses $62,151 8 % is not the same as Operating Income Growth Pct",
+      "confidence": "low",
+      "grounded": true
+    },
+    {
+      "claim": "Research and development expenses in 2025 were $34,550 and grew 10% compared to 2024",
+      "ratio_evidence": "operating_income_growth_pct: 7.98 (is an increase) and is not directly comparable to 10%",
+      "confidence": "low",
+      "grounded": true
+    },
+    {
+      "claim": "Services gross margin percentage increased in 2025 compared to 2024 primarily due to a different mix of services, partially offset by higher costs",
+      "ratio_evidence": "Services gross margin percentage increased from 73.9% to 75.4%",
+      "confidence": "low",
+      "grounded": false
+    },
+    {
+      "claim": "the Company\u2019s effective tax rate for 2025 was lower compared to 2024",
+      "ratio_evidence": "provision for income taxes and effective tax rate are 20.719 and 15.6%, respectively",
+      "confidence": "low",
+      "grounded": false
+    }
+  ],
+  "assessment": "The MD&A narrative is somewhat inconsistent with the actual financial ratios for specific claims, but generally aligns with the provided ratios in terms of direction and magnitude of changes.",
+  "computed_ratios": {
+    "net_income_growth_pct": 19.5,
+    "operating_income_growth_pct": 7.98,
+    "cost_of_revenue_growth_pct": 5.04
+  }
+}

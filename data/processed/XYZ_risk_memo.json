@@ -1,0 +1,32 @@
+{
+  "ticker": "XYZ",
+  "top_risks": [
+    {
+      "risk": "Concentration of Cash and Cash Equivalents",
+      "summary": "The company holds cash with large creditworthy institutions which may be subject to losses if one bank fails, and temporarily sweeps funds into insured programs overnight. However, amounts on deposit may exceed federal deposit insurance limits.",
+      "severity": "high"
+    },
+    {
+      "risk": "Concentration of Settlements Receivable",
+      "summary": "Three payment processors represent a significant portion (approximately 72% as of December 31, 2024) of settlements receivable. Concentration with one or more of these processors may lead to operational risks.",
+      "severity": "high"
+    },
+    {
+      "risk": "Credit Risk of Loans and Consumer Receivables",
+      "summary": "The company originates loans and consumer receivables which may be subject to credit risk. However, credit evaluations and ongoing performance monitoring are implemented to mitigate this risk.",
+      "severity": "medium"
+    },
+    {
+      "risk": "Operational Risk of Bitcoin Custody",
+      "summary": "The company stores bitcoin in digital wallets for its customers. If the private keys are lost or destroyed, the company may be unable to access the bitcoin, resulting in a loss.",
+      "severity": "medium"
+    },
+    {
+      "risk": "Risk of Regulatory or Tax Changes",
+      "summary": "The company is subject to various risks associated with changes in laws, regulations, and tax rates that may directly or indirectly affect its business or financial condition.",
+      "severity": "medium"
+    }
+  ],
+  "management_tone": "The company expects to continue efforts to control costs and achieve disciplined growth, which could lead to improved financial performance.",
+  "notable_flags": []
+}

@@ -1,0 +1,50 @@
+{
+  "flags": [
+    {
+      "claim": "Revenue was an increase of ten percent year-over-year for fiscal 2026.",
+      "ratio_evidence": "revenue_growth_pct: 26.78 (an increase)",
+      "confidence": "high",
+      "grounded": true
+    },
+    {
+      "claim": "Operating margin increased to approximately 20 percent for fiscal 2026 compared to approximately 19 percent in the prior year period.",
+      "ratio_evidence": "operating_income_growth_pct: 66.25; (revised to) gross_margin_by_year: -48.34 points (a decrease) - does not support claim; actual gross margin was -48.34 points",
+      "confidence": "high",
+      "grounded": true
+    },
+    {
+      "claim": "Subscription and support revenues accounted for approximately 95 percent of our total revenues for fiscal 2026.",
+      "ratio_evidence": "not directly comparable, no computed ratio for subscription and support revenues as a percent of total revenues",
+      "confidence": "low",
+      "grounded": false
+    },
+    {
+      "claim": "Growth in revenues is impacted by attrition.",
+      "ratio_evidence": "cost_of_revenue_growth_pct: 41.67 (an increase)",
+      "confidence": "low",
+      "grounded": true
+    }
+  ],
+  "assessment": "The provided MD&A narrative generally aligns with the provided COMPUTED FINANCIAL RATIOS, but contains a notable discrepancy regarding fiscal 2026 operating margin.",
+  "computed_ratios": {
+    "revenue_growth_pct": 26.78,
+    "gross_margin_delta_pts": -48.34,
+    "gross_margin_by_year": [
+      {
+        "fy": 2017,
+        "margin_pct": 1406.07
+      },
+      {
+        "fy": 2016,
+        "margin_pct": 1454.41
+      },
+      {
+        "fy": 2015,
+        "margin_pct": 1591.57
+      }
+    ],
+    "net_income_growth_pct": 80.29,
+    "operating_income_growth_pct": 66.25,
+    "cost_of_revenue_growth_pct": 41.67
+  }
+}

@@ -1,10 +1,10 @@
 """
 api/main.py — FastAPI app. /companies, /risk-memo/{ticker}, and
 /consistency/{ticker} serve PRE-COMPUTED, cached results (written by
-scripts/run_pipeline.py) — we deliberately don't call the LLM on every
-page load, both for demo latency and for cost. /query is the one endpoint
-that calls the LLM live, since it's a genuine ad-hoc user question and
-can't be pre-computed.
+scripts/run_pipeline.py) for the 8 pre-baked companies. /analyze runs a
+live, on-demand pipeline for ANY other ticker (see
+src/ondemand/ondemand_pipeline.py). /query is live ad-hoc Q&A against one
+of the 8 pre-baked companies specifically.
 
 Run with: uvicorn src.api.main:app --reload
 Swagger docs at /docs once running — useful for a live demo even before
@@ -30,6 +30,10 @@ app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], all
 class QueryRequest(BaseModel):
     ticker: str
     question: str
+
+
+class AnalyzeRequest(BaseModel):
+    ticker: str
 
 
 @app.get("/companies")
@@ -66,6 +70,30 @@ def get_consistency(ticker: str):
             status_code=404, detail=f"No cached consistency check for {ticker} — run the pipeline first."
         )
     return json.loads(consistency_path.read_text(encoding="utf-8"))
+
+
+@app.post("/analyze")
+def analyze_on_demand(req: AnalyzeRequest):
+    """Live end-to-end analysis for any ticker NOT in the 8 pre-baked
+    COMPANIES — fetches the filing, computes ratios, and generates a
+    memo + consistency check on the spot, using TF-IDF retrieval instead
+    of the semantic Chroma pipeline (see src/ondemand/tfidf_retriever.py
+    for why). Takes ~10-20s per new ticker; cached in-memory after the
+    first request. This is the endpoint that makes the live deployment
+    genuinely interactive, not just a viewer for 8 fixed companies."""
+    from src.ondemand.ondemand_pipeline import analyze_company, RateLimitExceeded, TickerNotFound
+
+    try:
+        return analyze_company(req.ticker)
+    except TickerNotFound as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except RateLimitExceeded as e:
+        raise HTTPException(status_code=429, detail=str(e))
+    except ImportError:
+        raise HTTPException(
+            status_code=503,
+            detail="Live analysis isn't available in this deployment (required libraries aren't installed here).",
+        )
 
 
 @app.post("/query")

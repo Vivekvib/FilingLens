@@ -2,20 +2,28 @@
 # as the root requirements.txt used for local development.
 #
 # /companies, /risk-memo, and /consistency only read cached JSON files and
-# never touch the embedding/vector-store stack. Only /query needs
-# sentence-transformers + chromadb, and installing those on a memory-
-# constrained free tier was causing OOM kills (PyTorch's default Linux
-# wheel bundles the full CUDA toolkit — several GB — even though there's
-# no GPU to use it on).
+# never touch any fetching or embedding stack.
 #
-# Deploying with this file means /query gracefully returns a 503 in
-# production (see the try/except in src/api/main.py's ad_hoc_query) while
-# the other 3 endpoints — the ones actually serving the demo's real
-# content — stay lightweight and reliable. Run locally with the full
-# requirements.txt to use /query and to run the pipeline.
+# POST /analyze (the on-demand "analyze any company" feature) DOES need
+# real SEC fetching (requests, beautifulsoup4) and retrieval (scikit-learn
+# for TF-IDF) — but deliberately NOT sentence-transformers/chromadb/torch.
+# Those were the actual cause of the earlier Render OOM crash (PyTorch's
+# default Linux wheel bundles the full CUDA toolkit, several GB, unneeded
+# on a CPU-only free tier) — scikit-learn has no such baggage, it's a
+# lightweight, CPU-native library. See src/ondemand/tfidf_retriever.py's
+# docstring for the full reasoning behind this split.
+#
+# /query (the OTHER live endpoint, for the 8 pre-baked companies) still
+# needs the full sentence-transformers/chromadb stack and is NOT
+# installed here — it gracefully returns a 503 in production (see the
+# try/except in src/api/main.py's ad_hoc_query). Run locally with the
+# full requirements.txt to use /query and to run the batch pipeline.
 
 groq>=0.11
 fastapi>=0.115
 uvicorn[standard]>=0.30
 pydantic>=2.7
 python-dotenv>=1.0
+requests>=2.31
+beautifulsoup4>=4.12
+scikit-learn>=1.4

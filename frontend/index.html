@@ -110,8 +110,13 @@
 
   .layout {
     display: grid;
-    grid-template-columns: 220px 1fr;
+    grid-template-columns: 220px 1fr 300px;
     min-height: calc(100vh - 64px);
+  }
+
+  @media (max-width: 1100px) {
+    .layout { grid-template-columns: 220px 1fr; }
+    .memo-sidebar { display: none; }
   }
 
   @media (max-width: 720px) {
@@ -190,6 +195,90 @@
   .memo {
     padding: 28px 36px 60px;
     max-width: 780px;
+  }
+
+  /* ── Right sidebar (Filing Snapshot + How It Works) ─────────────── */
+  .memo-sidebar {
+    padding: 28px 24px 60px 0;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    position: sticky;
+    top: 0;
+    align-self: start;
+    max-height: 100vh;
+    overflow-y: auto;
+  }
+
+  .sidebar-card {
+    background: var(--paper-card);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 16px 18px;
+  }
+
+  .sidebar-title {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    border-bottom: 1px solid var(--line);
+    padding-bottom: 8px;
+    margin-bottom: 10px;
+  }
+
+  .sidebar-stat-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 10px;
+    padding: 5px 0;
+    font-size: 0.82rem;
+  }
+
+  .sidebar-stat-label {
+    color: var(--muted);
+    font-size: 0.78rem;
+  }
+
+  .sidebar-stat-value {
+    font-family: var(--font-mono);
+    text-align: right;
+    font-weight: 600;
+  }
+
+  .sidebar-howitworks-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .sidebar-howitworks-item {
+    display: flex;
+    gap: 10px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--line);
+    font-size: 0.8rem;
+    line-height: 1.45;
+  }
+
+  .sidebar-howitworks-item:last-child { border-bottom: none; }
+
+  .sidebar-howitworks-num {
+    font-family: var(--font-mono);
+    font-weight: 600;
+    color: var(--ink);
+    flex-shrink: 0;
+  }
+
+  .sidebar-howitworks-label {
+    font-weight: 600;
+  }
+
+  .sidebar-howitworks-desc {
+    color: var(--muted);
+    display: block;
   }
 
   .memo-empty, .memo-error {
@@ -295,24 +384,13 @@
   }
 
   /* ── Consistency check ──────────────────────────────────────────── */
-  .ratio-chips {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    margin-bottom: 14px;
-  }
-
-  .ratio-chip {
-    font-family: var(--font-mono);
-    font-size: 0.72rem;
-    background: var(--paper-card);
-    border: 1px solid var(--line);
-    border-radius: var(--radius);
-    padding: 3px 8px;
-  }
-
-  .ratio-chip .val-pos { color: var(--verified); }
-  .ratio-chip .val-neg { color: var(--flag); }
+  /* Color utility classes for positive/negative numeric values — used on
+     ratio-bar-value, margin deltas, and the portfolio comparison bars.
+     Deliberately global, not scoped to a parent — an earlier version had
+     these nested under .ratio-chip only, which silently broke the
+     coloring anywhere else they were used. */
+  .val-pos { color: var(--verified); }
+  .val-neg { color: var(--flag); }
 
   .consistency-row {
     display: grid;
@@ -431,6 +509,307 @@
     padding: 1px 6px;
   }
 
+  /* ── Ratio bar chart (diverging, replaces plain text chips) ───────── */
+  .ratio-bar-chart {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+    margin-bottom: 10px;
+  }
+
+  .ratio-bar-row {
+    display: grid;
+    grid-template-columns: 170px 1fr 62px;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .ratio-bar-label {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    color: var(--muted);
+    text-align: right;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .ratio-bar-track {
+    position: relative;
+    height: 14px;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 2px;
+  }
+
+  .ratio-bar-zero {
+    position: absolute;
+    top: -1px;
+    bottom: -1px;
+    left: 50%;
+    width: 1px;
+    background: var(--line);
+  }
+
+  .ratio-bar-fill {
+    position: absolute;
+    top: 1px;
+    bottom: 1px;
+    border-radius: 1px;
+  }
+
+  .ratio-bar-fill.pos { background: var(--verified); }
+  .ratio-bar-fill.neg { background: var(--flag); }
+
+  .ratio-bar-value {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-align: right;
+  }
+
+  /* ── Margin trend (small vertical bar chart) ───────────────────────── */
+  .margin-trend-label {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    margin-bottom: 8px;
+  }
+
+  .margin-chart {
+    display: flex;
+    align-items: flex-end;
+    gap: 18px;
+    margin-bottom: 18px;
+  }
+
+  .margin-bar-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .margin-bar {
+    width: 30px;
+    background: var(--verified);
+    border-radius: 2px 2px 0 0;
+  }
+
+  .margin-bar-value {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    font-weight: 600;
+  }
+
+  .margin-bar-label {
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    color: var(--muted);
+  }
+
+  /* ── View tabs ──────────────────────────────────────────────────── */
+  .view-tabs {
+    display: flex;
+    gap: 2px;
+    padding: 0 24px;
+    border-bottom: 1px solid var(--line);
+    background: var(--paper-card);
+  }
+
+  .view-tab {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    padding: 11px 16px;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--muted);
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+  }
+
+  .view-tab:hover { color: var(--ink); }
+
+  .view-tab.active {
+    color: var(--ink);
+    border-bottom-color: var(--ink);
+    font-weight: 600;
+  }
+
+  /* ── Portfolio view ─────────────────────────────────────────────── */
+  .portfolio {
+    padding: 28px 36px 60px;
+    max-width: 1400px;
+  }
+
+  .portfolio-sections-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 32px 40px;
+    align-items: start;
+  }
+
+  .portfolio-section { margin-bottom: 0; }
+
+  .portfolio-title {
+    font-family: var(--font-display);
+    font-size: 1.15rem;
+    font-weight: 600;
+  }
+
+  .portfolio-subtitle {
+    font-size: 0.82rem;
+    color: var(--muted);
+    margin: 3px 0 16px;
+  }
+
+  .portfolio-bar-row {
+    display: grid;
+    grid-template-columns: 56px 1fr 64px;
+    align-items: center;
+    gap: 10px;
+    padding: 5px 0;
+  }
+
+  .portfolio-ticker {
+    font-family: var(--font-mono);
+    font-weight: 600;
+    font-size: 0.8rem;
+  }
+
+  .portfolio-bar-track {
+    position: relative;
+    height: 16px;
+    background: var(--paper);
+    border: 1px solid var(--line);
+    border-radius: 2px;
+  }
+
+  .portfolio-bar-zero {
+    position: absolute;
+    top: -1px;
+    bottom: -1px;
+    left: 50%;
+    width: 1px;
+    background: var(--line);
+  }
+
+  .portfolio-bar-fill {
+    position: absolute;
+    top: 1px;
+    bottom: 1px;
+    border-radius: 1px;
+  }
+
+  .portfolio-bar-fill.pos { background: var(--verified); }
+  .portfolio-bar-fill.neg { background: var(--flag); }
+  .portfolio-bar-fill.count { background: var(--ink); left: 0; }
+
+  .portfolio-bar-value {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    text-align: right;
+  }
+
+  .stacked-bar-track {
+    display: flex;
+    height: 16px;
+    border: 1px solid var(--line);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .stacked-seg-grounded { background: var(--verified); }
+  .stacked-seg-ungrounded { background: var(--flag-bg); }
+
+  .portfolio-legend {
+    display: flex;
+    gap: 16px;
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    color: var(--muted);
+    margin-bottom: 14px;
+  }
+
+  .legend-swatch {
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+    margin-right: 5px;
+    vertical-align: -1px;
+  }
+
+  /* ── Analyze a Company panel ────────────────────────────────────── */
+  .analyze-panel { padding: 28px 36px 60px; max-width: 1400px; }
+
+  .analyze-intro { margin-bottom: 24px; }
+
+  .analyze-body-grid {
+    display: grid;
+    grid-template-columns: 1fr 300px;
+    gap: 20px;
+    align-items: start;
+  }
+
+  @media (max-width: 1000px) {
+    .analyze-body-grid { grid-template-columns: 1fr; }
+    #analyze-sidebar { display: none !important; }
+  }
+
+  .analyze-subtitle {
+    font-size: 0.85rem;
+    color: var(--muted);
+    max-width: 620px;
+    margin: 6px 0 18px;
+    line-height: 1.55;
+  }
+
+  .analyze-form {
+    display: flex;
+    gap: 8px;
+    max-width: 420px;
+  }
+
+  .analyze-form .query-input { text-transform: uppercase; }
+
+  .analyze-loading {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 30px 4px;
+    color: var(--ink-soft);
+    font-style: italic;
+  }
+
+  .analyze-spinner {
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--line);
+    border-top-color: var(--ink);
+    border-radius: 50%;
+    animation: analyze-spin 0.8s linear infinite;
+    flex-shrink: 0;
+  }
+
+  @keyframes analyze-spin {
+    to { transform: rotate(360deg); }
+  }
+
+  .analyze-error {
+    padding: 14px 16px;
+    background: var(--flag-bg);
+    border-left: 3px solid var(--flag);
+    color: var(--ink);
+    font-size: 0.9rem;
+    margin-top: 10px;
+  }
+
 </style>
 </head>
 <body>
@@ -440,7 +819,13 @@
   <div class="app-subtitle">Financial Filings Intelligence — Agentic RAG over SEC 10-Ks</div>
 </header>
 
-<div class="layout">
+<div class="view-tabs">
+  <button class="view-tab active" id="tab-docket" type="button">Company Memo</button>
+  <button class="view-tab" id="tab-portfolio" type="button">Portfolio View</button>
+  <button class="view-tab" id="tab-analyze" type="button">Analyze a Company</button>
+</div>
+
+<div class="layout" id="docket-view">
   <nav class="docket" aria-label="Company docket">
     <div class="docket-label">Docket</div>
     <div class="docket-list" id="docket-list"></div>
@@ -449,13 +834,45 @@
   <main class="memo" id="memo" aria-live="polite">
     <div class="memo-empty">Select a filing from the docket to open its memo.</div>
   </main>
+
+  <aside class="memo-sidebar" id="memo-sidebar">
+    <div class="sidebar-card" id="sidebar-snapshot"></div>
+    <div class="sidebar-card" id="sidebar-howitworks"></div>
+  </aside>
 </div>
+
+<main class="portfolio" id="portfolio-view" style="display:none;" aria-live="polite">
+  <div class="memo-empty">Loading portfolio comparison…</div>
+</main>
+
+<main class="analyze-panel" id="analyze-view" style="display:none;" aria-live="polite">
+  <div class="analyze-intro">
+    <div class="compare-title">Analyze Any Company</div>
+    <p class="analyze-subtitle">
+      Type a US-listed ticker not already in the docket to generate a live risk memo and consistency check
+      from its most recent SEC 10-K. Takes about 10–20 seconds. Uses a lighter, keyword-based search
+      instead of the semantic search used for the 8 pre-baked companies — see the prototype note below.
+    </p>
+    <form class="analyze-form" id="analyze-form">
+      <input type="text" class="query-input" id="analyze-input" placeholder="e.g. NVDA, DIS, KO" required
+             maxlength="10" autocapitalize="characters" />
+      <button type="submit" class="query-submit" id="analyze-submit">Analyze</button>
+    </form>
+  </div>
+
+  <div class="analyze-body-grid">
+    <div id="analyze-result"></div>
+    <aside class="memo-sidebar" id="analyze-sidebar" style="display:none;">
+      <div class="sidebar-card" id="analyze-sidebar-snapshot"></div>
+    </aside>
+  </div>
+</main>
 
 <script>
   // Auto-detects local vs. deployed so the same file works in both places
   // without manual edits. Update RENDER_API_URL once after deploying the
   // backend to Render — everything else adapts automatically.
-  const RENDER_API_URL = "https://filinglens-2wqv.onrender.com"; // <-- replace with your actual Render URL after deploy
+  const RENDER_API_URL = "https://filinglens-2wqv.onrender.com";
   const isLocal = location.hostname === "localhost" || location.hostname === "127.0.0.1" || location.protocol === "file:";
   const API_BASE = isLocal ? "http://127.0.0.1:8000" : RENDER_API_URL;
 
@@ -470,11 +887,60 @@
     return div.innerHTML;
   }
 
-  function formatRatioValue(key, val) {
-    if (typeof val !== "number") return escapeHtml(String(val));
-    const cls = val >= 0 ? "val-pos" : "val-neg";
-    const sign = val > 0 ? "+" : "";
-    return `<span class="${cls}">${sign}${val}%</span>`;
+  // Diverging bar chart for the computed growth/margin-delta ratios — the
+  // scale is per-company (based on that company's own max magnitude), so
+  // bars are always readable regardless of whether values are single or
+  // double digit. NOT used for cross-company comparison — the Portfolio
+  // view below uses a single SHARED scale for that, since comparing bars
+  // drawn at different scales would be misleading.
+  function renderRatioBars(ratios) {
+    const entries = Object.entries(ratios).filter(([k]) => !k.endsWith("_by_year"));
+    if (entries.length === 0) {
+      return '<p style="color:var(--muted); font-size:0.85rem;">No ratios could be computed for this company.</p>';
+    }
+    const maxAbs = Math.max(10, ...entries.map(([, v]) => Math.abs(v)));
+    const rows = entries.map(([key, val]) => {
+      const isPos = val >= 0;
+      const halfWidthPct = Math.min((Math.abs(val) / maxAbs) * 50, 50);
+      const leftPct = isPos ? 50 : 50 - halfWidthPct;
+      const sign = val > 0 ? "+" : "";
+      return `
+        <div class="ratio-bar-row">
+          <span class="ratio-bar-label">${escapeHtml(key)}</span>
+          <div class="ratio-bar-track">
+            <div class="ratio-bar-zero"></div>
+            <div class="ratio-bar-fill ${isPos ? "pos" : "neg"}" style="left:${leftPct}%; width:${halfWidthPct}%;"></div>
+          </div>
+          <span class="ratio-bar-value ${isPos ? "val-pos" : "val-neg"}">${sign}${val}%</span>
+        </div>
+      `;
+    }).join("");
+    return `<div class="ratio-bar-chart">${rows}</div>`;
+  }
+
+  // Small vertical bar chart for gross_margin_by_year, when present.
+  // Fixed pixel heights (not %) deliberately — percentage heights inside
+  // nested flex columns don't reliably resolve without an explicit height
+  // on every ancestor, and this is simpler and more robust.
+  function renderMarginTrend(byYear) {
+    if (!byYear || byYear.length === 0) return "";
+    const MAX_BAR_PX = 50;
+    const maxVal = Math.max(...byYear.map(y => y.margin_pct));
+    const sorted = [...byYear].sort((a, b) => a.fy - b.fy);
+    const bars = sorted.map(y => {
+      const heightPx = Math.max((y.margin_pct / maxVal) * MAX_BAR_PX, 4);
+      return `
+        <div class="margin-bar-col">
+          <span class="margin-bar-value">${y.margin_pct}%</span>
+          <div class="margin-bar" style="height:${heightPx}px;"></div>
+          <span class="margin-bar-label">FY${escapeHtml(String(y.fy))}</span>
+        </div>
+      `;
+    }).join("");
+    return `
+      <div class="margin-trend-label">Gross Margin Trend</div>
+      <div class="margin-chart">${bars}</div>
+    `;
   }
 
   async function fetchJSON(path) {
@@ -486,6 +952,144 @@
       throw err;
     }
     return res.json();
+  }
+
+  // ── Portfolio view (cross-company comparison) ─────────────────────
+  // Unlike the per-company ratio bars (renderRatioBars above, scaled to
+  // each company's own max magnitude), these use ONE shared scale across
+  // all 8 companies — comparing bars drawn at different scales per row
+  // would misrepresent the relative sizes.
+  let portfolioLoaded = false;
+
+  function portfolioDivergingRow(ticker, value, maxAbs) {
+    if (typeof value !== "number") {
+      return `
+        <div class="portfolio-bar-row">
+          <span class="portfolio-ticker">${escapeHtml(ticker)}</span>
+          <span style="font-family:var(--font-mono); font-size:0.72rem; color:var(--muted); font-style:italic;">no data</span>
+          <span></span>
+        </div>
+      `;
+    }
+    const isPos = value >= 0;
+    const halfWidthPct = maxAbs > 0 ? Math.min((Math.abs(value) / maxAbs) * 50, 50) : 0;
+    const leftPct = isPos ? 50 : 50 - halfWidthPct;
+    const sign = value > 0 ? "+" : "";
+    return `
+      <div class="portfolio-bar-row">
+        <span class="portfolio-ticker">${escapeHtml(ticker)}</span>
+        <div class="portfolio-bar-track">
+          <div class="portfolio-bar-zero"></div>
+          <div class="portfolio-bar-fill ${isPos ? "pos" : "neg"}" style="left:${leftPct}%; width:${halfWidthPct}%;"></div>
+        </div>
+        <span class="portfolio-bar-value ${isPos ? "val-pos" : "val-neg"}">${sign}${value}%</span>
+      </div>
+    `;
+  }
+
+  function portfolioGroundingRow(ticker, flags) {
+    if (!flags || flags.length === 0) {
+      return `
+        <div class="portfolio-bar-row">
+          <span class="portfolio-ticker">${escapeHtml(ticker)}</span>
+          <span style="font-family:var(--font-mono); font-size:0.72rem; color:var(--muted); font-style:italic;">no flags raised</span>
+          <span></span>
+        </div>
+      `;
+    }
+    const grounded = flags.filter(f => f.grounded).length;
+    const total = flags.length;
+    const groundedPct = (grounded / total) * 100;
+    return `
+      <div class="portfolio-bar-row">
+        <span class="portfolio-ticker">${escapeHtml(ticker)}</span>
+        <div class="stacked-bar-track">
+          <div class="stacked-seg-grounded" style="width:${groundedPct}%;"></div>
+          <div class="stacked-seg-ungrounded" style="width:${100 - groundedPct}%;"></div>
+        </div>
+        <span class="portfolio-bar-value">${grounded}/${total}</span>
+      </div>
+    `;
+  }
+
+  async function loadPortfolioView() {
+    const container = document.getElementById("portfolio-view");
+    container.innerHTML = `<div class="memo-empty">Loading comparison across ${companiesCache.length} companies…</div>`;
+
+    // Fetch every company's consistency check in parallel. A missing file
+    // (e.g. pipeline never ran for that ticker) degrades to null rather
+    // than breaking the whole view — same pattern as selectCompany().
+    const results = await Promise.all(
+      companiesCache.map(async c => {
+        const consistency = await fetchJSON(`/consistency/${c.ticker}`).catch(() => null);
+        return { ticker: c.ticker, consistency };
+      })
+    );
+
+    const revenueValues = results
+      .map(r => r.consistency?.computed_ratios?.revenue_growth_pct)
+      .filter(v => typeof v === "number");
+    const netIncomeValues = results
+      .map(r => r.consistency?.computed_ratios?.net_income_growth_pct)
+      .filter(v => typeof v === "number");
+    const maxRevenue = Math.max(10, ...revenueValues.map(Math.abs));
+    const maxNetIncome = Math.max(10, ...netIncomeValues.map(Math.abs));
+
+    const revenueRows = results
+      .map(r => portfolioDivergingRow(r.ticker, r.consistency?.computed_ratios?.revenue_growth_pct, maxRevenue))
+      .join("");
+    const netIncomeRows = results
+      .map(r => portfolioDivergingRow(r.ticker, r.consistency?.computed_ratios?.net_income_growth_pct, maxNetIncome))
+      .join("");
+    const groundingRows = results
+      .map(r => portfolioGroundingRow(r.ticker, r.consistency?.flags))
+      .join("");
+
+    container.innerHTML = `
+      <div class="portfolio-sections-grid">
+        <div class="portfolio-section">
+          <div class="portfolio-title">Revenue Growth — Year over Year</div>
+          <div class="portfolio-subtitle">Computed directly from SEC XBRL data, not LLM-estimated. Same scale across all companies.</div>
+          ${revenueRows}
+        </div>
+
+        <div class="portfolio-section">
+          <div class="portfolio-title">Net Income Growth — Year over Year</div>
+          <div class="portfolio-subtitle">Computed directly from SEC XBRL data, not LLM-estimated. Same scale across all companies.</div>
+          ${netIncomeRows}
+        </div>
+
+        <div class="portfolio-section">
+          <div class="portfolio-title">Consistency Check — Grounded vs. Unverified Flags</div>
+          <div class="portfolio-subtitle">Share of narrative-vs-numbers flags actually backed by a real computed ratio, not just the model's own confidence label — see _enforce_grounding in the consistency checker.</div>
+          <div class="portfolio-legend">
+            <span><span class="legend-swatch" style="background:var(--verified);"></span>Grounded</span>
+            <span><span class="legend-swatch" style="background:var(--flag-bg); border:1px solid var(--flag);"></span>Ungrounded</span>
+          </div>
+          ${groundingRows}
+        </div>
+      </div>
+    `;
+  }
+
+  function showView(view) {
+    const tabs = { docket: "tab-docket", portfolio: "tab-portfolio", analyze: "tab-analyze" };
+    const views = { docket: "docket-view", portfolio: "portfolio-view", analyze: "analyze-view" };
+
+    for (const key of Object.keys(tabs)) {
+      document.getElementById(tabs[key]).classList.toggle("active", key === view);
+      document.getElementById(views[key]).style.display =
+        key !== view ? "none" : key === "docket" ? "grid" : "block";
+    }
+
+    if (view === "portfolio" && !portfolioLoaded) {
+      portfolioLoaded = true;
+      loadPortfolioView().catch(() => {
+        portfolioLoaded = false; // allow a retry on next tab click if the load itself failed
+        document.getElementById("portfolio-view").innerHTML =
+          '<div class="memo-error">Could not load the portfolio comparison. Try switching tabs again.</div>';
+      });
+    }
   }
 
   async function loadCompanies() {
@@ -515,6 +1119,84 @@
     }
   }
 
+  // ── Sidebar: How It Works (static) + Filing Snapshot (per company) ─
+  function renderHowItWorksCard() {
+    const el = document.getElementById("sidebar-howitworks");
+    if (!el) return;
+    el.innerHTML = `
+      <div class="sidebar-title">How FilingLens Works</div>
+      <ol class="sidebar-howitworks-list">
+        <li class="sidebar-howitworks-item">
+          <span class="sidebar-howitworks-num">1</span>
+          <span><span class="sidebar-howitworks-label">Retrieve</span><span class="sidebar-howitworks-desc">Pulls Risk Factors &amp; MD&amp;A text directly from the company's SEC 10-K.</span></span>
+        </li>
+        <li class="sidebar-howitworks-item">
+          <span class="sidebar-howitworks-num">2</span>
+          <span><span class="sidebar-howitworks-label">Synthesize</span><span class="sidebar-howitworks-desc">An LLM drafts the risk memo grounded only in that retrieved text.</span></span>
+        </li>
+        <li class="sidebar-howitworks-item">
+          <span class="sidebar-howitworks-num">3</span>
+          <span><span class="sidebar-howitworks-label">Verify</span><span class="sidebar-howitworks-desc">Every consistency flag is checked in code against real XBRL numbers, not just the model's word.</span></span>
+        </li>
+        <li class="sidebar-howitworks-item">
+          <span class="sidebar-howitworks-num">4</span>
+          <span><span class="sidebar-howitworks-label">Flag</span><span class="sidebar-howitworks-desc">Claims that can't be verified are marked unverified, not hidden.</span></span>
+        </li>
+      </ol>
+    `;
+  }
+
+  function renderSidebarSnapshot(el, companyInfo, riskMemo, consistency) {
+    if (!el) return;
+
+    const risks = riskMemo.top_risks || [];
+    const severityCounts = { high: 0, medium: 0, low: 0 };
+    risks.forEach(r => { if (severityCounts[r.severity] !== undefined) severityCounts[r.severity]++; });
+    const severitySummary = [
+      severityCounts.high ? `${severityCounts.high} high` : null,
+      severityCounts.medium ? `${severityCounts.medium} medium` : null,
+      severityCounts.low ? `${severityCounts.low} low` : null,
+    ].filter(Boolean).join(" · ") || "—";
+
+    let flagsRow = `<div class="sidebar-stat-row"><span class="sidebar-stat-label">Consistency Flags</span><span class="sidebar-stat-value">—</span></div>`;
+    let ratiosRow = `<div class="sidebar-stat-row"><span class="sidebar-stat-label">Ratios Computed</span><span class="sidebar-stat-value">0</span></div>`;
+    if (consistency) {
+      const flags = consistency.flags || [];
+      const grounded = flags.filter(f => f.grounded).length;
+      flagsRow = `
+        <div class="sidebar-stat-row">
+          <span class="sidebar-stat-label">Consistency Flags</span>
+          <span class="sidebar-stat-value">${flags.length ? `${grounded} verified / ${flags.length}` : "none raised"}</span>
+        </div>
+      `;
+      const ratioCount = Object.keys(consistency.computed_ratios || {}).filter(k => !k.endsWith("_by_year")).length;
+      ratiosRow = `
+        <div class="sidebar-stat-row">
+          <span class="sidebar-stat-label">Ratios Computed</span>
+          <span class="sidebar-stat-value">${ratioCount}</span>
+        </div>
+      `;
+    }
+
+    el.innerHTML = `
+      <div class="sidebar-title">Filing Snapshot</div>
+      <div class="sidebar-stat-row">
+        <span class="sidebar-stat-label">Sector</span>
+        <span class="sidebar-stat-value">${escapeHtml(companyInfo.sector || "—")}</span>
+      </div>
+      <div class="sidebar-stat-row">
+        <span class="sidebar-stat-label">CIK</span>
+        <span class="sidebar-stat-value">${escapeHtml(companyInfo.cik || "—")}</span>
+      </div>
+      <div class="sidebar-stat-row">
+        <span class="sidebar-stat-label">Top Risks</span>
+        <span class="sidebar-stat-value">${escapeHtml(severitySummary)}</span>
+      </div>
+      ${flagsRow}
+      ${ratiosRow}
+    `;
+  }
+
   async function selectCompany(ticker) {
     activeTicker = ticker;
     document.querySelectorAll(".docket-item").forEach(el => {
@@ -536,10 +1218,13 @@
       return;
     }
 
-    renderMemo(companyInfo, riskMemo, consistency);
+    renderMemo(memo, companyInfo, riskMemo, consistency);
+    renderSidebarSnapshot(document.getElementById("sidebar-snapshot"), companyInfo, riskMemo, consistency);
   }
 
-  function renderMemo(companyInfo, riskMemo, consistency) {
+  function renderMemo(targetEl, companyInfo, riskMemo, consistency, options = {}) {
+    const showQueryBox = options.showQueryBox !== false; // default true — unchanged for the docket view
+
     const risksHtml = (riskMemo.top_risks || []).map(r => `
       <li class="risk-item">
         <div class="risk-body">
@@ -558,10 +1243,9 @@
     if (consistency === null) {
       consistencyHtml = `<div class="section-label">Consistency Check</div><p style="color:var(--muted); font-style:italic;">No consistency check on file for this company yet.</p>`;
     } else {
-      const ratioChips = Object.entries(consistency.computed_ratios || {})
-        .filter(([k]) => !k.endsWith("_by_year"))
-        .map(([k, v]) => `<span class="ratio-chip">${escapeHtml(k)}: ${formatRatioValue(k, v)}</span>`)
-        .join("");
+      const ratios = consistency.computed_ratios || {};
+      const ratioBarsHtml = renderRatioBars(ratios);
+      const marginTrendHtml = renderMarginTrend(ratios.gross_margin_by_year);
 
       const rows = (consistency.flags || []).map(f => {
         const stampClass = f.grounded ? "stamp-verified" : "stamp-unverified";
@@ -577,13 +1261,30 @@
 
       consistencyHtml = `
         <div class="section-label">Consistency Check — Narrative vs. Reported Financials</div>
-        <div class="ratio-chips">${ratioChips || '<span style="color:var(--muted); font-size:0.85rem;">No ratios could be computed for this company.</span>'}</div>
+        ${ratioBarsHtml}
+        ${marginTrendHtml}
         ${rows || '<p style="color:var(--muted); font-style:italic;">No flags raised against the computed ratios.</p>'}
         <div class="consistency-assessment">${escapeHtml(consistency.assessment || "")}</div>
       `;
     }
 
-    memo.innerHTML = `
+    const queryBoxHtml = showQueryBox ? `
+      <div class="query-box">
+        <div class="section-label" style="border-bottom:none; margin-bottom:8px;">Ask a Question</div>
+        <form class="query-form" id="query-form">
+          <input type="text" class="query-input" id="query-input"
+                 placeholder="e.g. What does the filing say about regulatory risk?" required />
+          <button type="submit" class="query-submit" id="query-submit">Ask</button>
+        </form>
+        <div id="query-result"></div>
+      </div>
+    ` : `
+      <div class="query-box">
+        <p style="color:var(--muted); font-style:italic; font-size:0.85rem;">Live Q&amp;A isn't available for on-demand companies yet — it works for the 8 pre-baked companies when running locally.</p>
+      </div>
+    `;
+
+    targetEl.innerHTML = `
       <div class="memo-letterhead">
         <div class="memo-company">${escapeHtml(companyInfo.name || riskMemo.ticker)}</div>
         <div class="memo-meta">${escapeHtml(riskMemo.ticker)} · CIK ${escapeHtml(companyInfo.cik || "—")} · ${escapeHtml(companyInfo.sector || "")}</div>
@@ -600,18 +1301,12 @@
 
       ${consistencyHtml}
 
-      <div class="query-box">
-        <div class="section-label" style="border-bottom:none; margin-bottom:8px;">Ask a Question</div>
-        <form class="query-form" id="query-form">
-          <input type="text" class="query-input" id="query-input"
-                 placeholder="e.g. What does the filing say about regulatory risk?" required />
-          <button type="submit" class="query-submit" id="query-submit">Ask</button>
-        </form>
-        <div id="query-result"></div>
-      </div>
+      ${queryBoxHtml}
     `;
 
-    document.getElementById("query-form").addEventListener("submit", handleQuery);
+    if (showQueryBox) {
+      targetEl.querySelector("#query-form").addEventListener("submit", handleQuery);
+    }
   }
 
   async function handleQuery(evt) {
@@ -657,6 +1352,89 @@
     }
   }
 
+  // ── Analyze a Company (on-demand, live pipeline) ──────────────────
+  const ANALYZE_LOADING_MESSAGES = [
+    "Looking up the company on SEC EDGAR…",
+    "Fetching the latest 10-K filing…",
+    "Pulling structured financials (XBRL)…",
+    "Indexing the filing text…",
+    "Generating the risk memo…",
+    "Cross-checking the narrative against the numbers…",
+  ];
+
+  let analyzeLoadingInterval = null;
+
+  function startAnalyzeLoadingMessages(container) {
+    let i = 0;
+    container.innerHTML = `
+      <div class="analyze-loading">
+        <div class="analyze-spinner"></div>
+        <span id="analyze-loading-text">${ANALYZE_LOADING_MESSAGES[0]}</span>
+      </div>
+    `;
+    analyzeLoadingInterval = setInterval(() => {
+      i = (i + 1) % ANALYZE_LOADING_MESSAGES.length;
+      const textEl = document.getElementById("analyze-loading-text");
+      if (textEl) textEl.textContent = ANALYZE_LOADING_MESSAGES[i];
+    }, 2500);
+  }
+
+  function stopAnalyzeLoadingMessages() {
+    if (analyzeLoadingInterval) {
+      clearInterval(analyzeLoadingInterval);
+      analyzeLoadingInterval = null;
+    }
+  }
+
+  async function handleAnalyzeSubmit(evt) {
+    evt.preventDefault();
+    const input = document.getElementById("analyze-input");
+    const submitBtn = document.getElementById("analyze-submit");
+    const resultBox = document.getElementById("analyze-result");
+    const sidebar = document.getElementById("analyze-sidebar");
+    const ticker = input.value.trim().toUpperCase();
+    if (!ticker) return;
+
+    submitBtn.disabled = true;
+    sidebar.style.display = "none"; // hide any previous result's sidebar while a new one loads
+    startAnalyzeLoadingMessages(resultBox);
+
+    try {
+      const res = await fetch(`${API_BASE}/analyze`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ticker }),
+      });
+      const body = await res.json().catch(() => ({}));
+
+      if (!res.ok) {
+        throw new Error(body.detail || `Request failed (${res.status})`);
+      }
+
+      stopAnalyzeLoadingMessages();
+      resultBox.innerHTML = "";
+      // Reuses the exact same memo template as the docket view — the
+      // /analyze response is deliberately shaped to match (company_info,
+      // risk_memo, consistency). showQueryBox: false since /query
+      // doesn't support on-demand tickers yet (see renderMemo's options).
+      renderMemo(resultBox, body.company_info, body.risk_memo, body.consistency, { showQueryBox: false });
+
+      renderSidebarSnapshot(document.getElementById("analyze-sidebar-snapshot"), body.company_info, body.risk_memo, body.consistency);
+      sidebar.style.display = "flex";
+    } catch (e) {
+      stopAnalyzeLoadingMessages();
+      resultBox.innerHTML = `<div class="analyze-error">Couldn't analyze ${escapeHtml(ticker)}: ${escapeHtml(e.message)}</div>`;
+    } finally {
+      submitBtn.disabled = false;
+    }
+  }
+
+  document.getElementById("tab-docket").addEventListener("click", () => showView("docket"));
+  document.getElementById("tab-portfolio").addEventListener("click", () => showView("portfolio"));
+  document.getElementById("tab-analyze").addEventListener("click", () => showView("analyze"));
+  document.getElementById("analyze-form").addEventListener("submit", handleAnalyzeSubmit);
+
+  renderHowItWorksCard();
   loadCompanies();
 </script>
 

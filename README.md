@@ -5,12 +5,17 @@ from Risk Factors / MD&A sections to generate a structured risk memo per
 company, and cross-checks management's narrative claims in MD&A against
 actual XBRL-reported financials to flag inconsistencies — each flag is
 deterministically checked against the real computed ratios before being
-labeled "verified," not just trusted at the model's own word.
+labeled "verified," not just trusted at the model's own word. A live
+`/analyze` endpoint also runs this pipeline on demand for any US-listed
+ticker, not just a fixed pre-baked list.
 
-> **Status:** fully working end-to-end across 8 companies (JPM, GS, PYPL,
-> XYZ/Block, AAPL, MSFT, CRM, ADBE) — ingestion, XBRL, RAG, risk memos,
-> consistency checks, FastAPI backend, and frontend all built and verified
-> against real output, not just passing tests.
+> **Status:** fully working end-to-end across 8 pre-baked companies (JPM,
+> GS, PYPL, XYZ/Block, AAPL, MSFT, CRM, ADBE), plus a live on-demand
+> analysis path for any other ticker. Deployed: backend on Render,
+> frontend on Vercel. This is an early-stage prototype, built and
+> iterated on a $0 infrastructure budget — see "Known limitations" and
+> the deployment notes below for the honest trade-offs that come with
+> that constraint.
 
 ## Quickstart (local)
 
@@ -47,11 +52,32 @@ unreliable and enforces a deterministic grounding check in code (see
 `_enforce_grounding` in `src/agent/consistency_checker.py`) rather than
 trusting it at face value.
 
+## Two retrieval paths: semantic (pre-baked) vs. TF-IDF (on-demand)
+
+The 8 pre-baked companies use a proper semantic search pipeline
+(sentence-transformers embeddings + ChromaDB), built and run offline via
+`scripts/run_pipeline.py`. The live `/analyze` endpoint — for any other
+ticker a user types in — deliberately uses a lighter, keyword-based
+TF-IDF index instead (`src/ondemand/tfidf_retriever.py`), built fresh
+in-memory per request.
+
+This wasn't a shortcut taken by accident — it's a direct consequence of
+the same OOM lesson documented below: PyTorch's default wheel bundles
+the entire CUDA toolkit, and that's what crashed the Render deployment
+the first time. Keeping the live, public-facing analysis path on
+scikit-learn (lightweight, no GPU baggage) instead of reintroducing
+torch was the deliberate trade: slightly lower retrieval quality
+(keyword matching, not meaning matching) in exchange for a feature that
+actually stays up in production, for free. The pre-baked companies never
+had to make that trade, since their embeddings are generated once,
+offline, and just served as static cached files afterward.
+
 ## Architecture
 
 See `BUILD_PLAN.md` for the full build reasoning. Short version:
 
 ```
+                    8 PRE-BAKED COMPANIES (offline, scripts/run_pipeline.py)
 SEC EDGAR (10-K text)  ─┐
                          ├─> chunker (section-aware, regex + semantic fallback)
 SEC XBRL (companyfacts) ┘         │
@@ -63,14 +89,26 @@ SEC XBRL (companyfacts) ┘         │
         └──────────────┬───────────┘
                         └─> consistency_checker (ratios + narrative -> Groq
                             -> _enforce_grounding, a deterministic check)
+
+                    ANY OTHER TICKER (live, POST /analyze)
+ticker_lookup (SEC company_tickers.json) -> edgar_fetcher + xbrl_fetcher
+        -> chunker (SAME code as above) -> TfidfRetriever (in-memory, no torch)
+        -> risk_memo_generator + consistency_checker (SAME code, retrieve_fn injected)
+
                                     │
                                     v
-        FastAPI: /companies  /risk-memo/{ticker}
-                 /consistency/{ticker}  /query
+        FastAPI: /companies  /risk-memo/{ticker}  /consistency/{ticker}
+                 /analyze  /query
                                     │
                                     v
-                    frontend (case-file docket + memo UI)
+      frontend (case-file docket + memo UI + portfolio comparison + analyze tab)
 ```
+
+The key design point: `risk_memo_generator.generate_risk_memo()` and
+`consistency_checker.check_consistency()` both accept an optional
+`retrieve_fn` — the exact same prompt/synthesis logic is reused for both
+paths, only the retrieval backend underneath differs. No duplicated
+LLM-calling code between the pre-baked and on-demand pipelines.
 
 ## Known limitations
 
@@ -80,23 +118,44 @@ SEC XBRL (companyfacts) ┘         │
   less ground truth to work with for financial-sector filings. The
   deterministic grounding check correctly downgrades ungrounded claims to
   low confidence rather than forcing false precision, but a bank-specific
-  XBRL tag mapping would close this gap — noted as future work rather
-  than fixed under the build deadline.
-- **`/query` is the one memory-heavy endpoint.** It's the only code path
-  that loads the sentence-transformers embedding model (lazily, on first
-  call) — `/companies`, `/risk-memo`, and `/consistency` only read cached
-  JSON and stay lightweight. On the deployed Render instance, `/query` is
-  deliberately disabled in production (see Deployment section below) —
-  PyTorch's default wheel bundles the full CUDA toolkit, several GB
-  unneeded on a CPU-only free tier, and installing it was OOM-killing the
-  whole service before it could serve anything. Trading one endpoint for
-  reliability on the other three was the right call under the deadline;
-  `/query` works fully when run locally.
+  XBRL tag mapping would close this gap — noted as future work.
+- **`/query` (live Q&A) only works for the 8 pre-baked companies, and
+  only when running locally.** It's the one code path that needs the
+  sentence-transformers embedding stack, which isn't installed on Render
+  (see the OOM story below) — it returns a clean `503` in production.
+  On-demand companies (via `/analyze`) don't support `/query` at all yet;
+  the TF-IDF retriever underneath them isn't currently cached anywhere
+  the query endpoint could reach — a natural fast-follow, not a hard
+  limitation, since the retriever object could simply be kept alongside
+  the cached result.
+- **On-demand analysis results are not persistent.** They live in an
+  in-memory dict for the life of the running Render process, and Render's
+  free-tier disk is ephemeral — a restart or redeploy clears the cache,
+  and the next request for that ticker just re-runs the ~15s pipeline.
+  Real persistence would need a database. This is exactly the kind of
+  thing a small hosting budget would unlock — see below.
+- **The live `/analyze` endpoint has a simple global rate limit** (20
+  analyses/hour, shared across all visitors, not per-IP) to protect the
+  free Groq quota from being exhausted if the link gets shared widely.
+  Simple by design for a prototype — a real deployment would want
+  per-user limits.
+
+## Roadmap — what a small hosting budget would unlock
+
+This project is deliberately built to run entirely on free tiers, which
+shapes several of the trade-offs above. With a modest budget, the
+natural next steps are:
+- A real database for on-demand analysis results, so they persist across
+  restarts and don't need to be regenerated for every visitor.
+- Semantic (not just TF-IDF) retrieval for on-demand companies too, by
+  hosting the embedding stack on infrastructure with enough memory
+  headroom to not OOM.
+- `/query` (live ad-hoc Q&A) available in production for all companies,
+  not just locally.
+- Per-user rate limiting instead of a single global cap.
+- Multi-year filing history per company, instead of just the latest 10-K.
 
 ## Deployment
-
-Backend on Render, frontend on Vercel — same pattern as two other shipped
-projects (a Flask/Postgres marketplace app and a quant risk dashboard).
 
 **Backend (Render):**
 1. Push this repo to GitHub. `data/processed/` and `data/chroma_db/` are
@@ -109,18 +168,19 @@ projects (a Flask/Postgres marketplace app and a quant risk dashboard).
    sentence-transformers/chromadb/torch, and PyTorch's default Linux
    wheel bundles the entire CUDA toolkit (multiple GB) even though
    there's no GPU on a free-tier instance — that was OOM-killing the
-   deploy before it ever bound a port. `/companies`, `/risk-memo`, and
-   `/consistency` never touch that stack anyway (they only read cached
-   JSON), so `requirements-render.txt` deliberately excludes it.
+   deploy before it ever bound a port. `requirements-render.txt` installs
+   `scikit-learn` instead (needed for the live `/analyze` endpoint's
+   TF-IDF retrieval) — much lighter, no GPU baggage, verified to add only
+   ~100MB at actual runtime, not several GB.
 4. Start command: `uvicorn src.api.main:app --host 0.0.0.0 --port $PORT`
 5. Environment variables: `GROQ_API_KEY`, `SEC_USER_AGENT`.
 6. Free tier spins down after inactivity — first request after idle can
    take 30–60s to wake up, same as the other two projects.
 7. **Known trade-off:** with the slim requirements, `/query` (live ad-hoc
-   Q&A) returns a `503` in this deployment instead of an answer — it's
-   the one endpoint that needs the embedding stack. `/companies`,
-   `/risk-memo`, and `/consistency` — the core of the demo — work fully.
-   Run locally with the root `requirements.txt` for working `/query`.
+   Q&A for the 8 pre-baked companies) returns a `503` in this deployment.
+   `/analyze` (live analysis for ANY ticker) works fully in production —
+   it uses the lighter TF-IDF path specifically so it doesn't need the
+   heavy stack that caused the original crash.
 
 **Frontend (Vercel):**
 1. New Vercel project, same repo, set **Root Directory** to `frontend`.

@@ -119,19 +119,26 @@ def _enforce_grounding(result: dict, ratios: dict) -> dict:
     return result
 
 
-def check_consistency(ticker: str, xbrl_facts: dict) -> dict:
+def check_consistency(ticker: str, xbrl_facts: dict, retrieve_fn=None) -> dict:
+    """retrieve_fn: optional callable matching src.rag.retriever.retrieve's
+    signature. Defaults to the real Chroma-backed retriever (imported
+    lazily so this stays importable without chromadb) — the on-demand
+    pipeline injects a TF-IDF retriever instead. See
+    risk_memo_generator.generate_risk_memo for the same pattern."""
     from groq import Groq
 
     from config import GROQ_API_KEY, LLM_MODEL_SYNTHESIS, CONSISTENCY_CHECK_MDA_CHUNKS
-    from src.rag.retriever import retrieve
+
+    if retrieve_fn is None:
+        from src.rag.retriever import retrieve as retrieve_fn
 
     ratios = compute_ratios(xbrl_facts)
     if not ratios:
-        return {"flags": [], "assessment": "Insufficient XBRL data to compute ratios for this company."}
+        return {"flags": [], "assessment": "Insufficient XBRL data to compute ratios for this company.", "computed_ratios": {}}
 
     client = Groq(api_key=GROQ_API_KEY)
 
-    mda_chunks = retrieve(
+    mda_chunks = retrieve_fn(
         "financial performance, margins, growth, and outlook commentary",
         ticker=ticker,
         section="mda",

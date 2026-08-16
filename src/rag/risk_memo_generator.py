@@ -5,6 +5,12 @@ memo. This is the one place in the pipeline where the LLM does synthesis
 rather than lookup — everything it's given is retrieved text, and the
 prompt explicitly asks it to ground every point in that text so we're not
 generating from parametric memory of the company.
+
+generate_risk_memo() accepts an optional retrieve_fn so this same prompt
+logic can be reused by the on-demand "analyze any company" pipeline
+(src/ondemand/ondemand_pipeline.py), which retrieves via an in-memory
+TF-IDF index instead of the persistent Chroma collection. Default behavior
+(the 8 pre-baked companies via scripts/run_pipeline.py) is unchanged.
 """
 
 import json
@@ -12,7 +18,6 @@ import json
 from groq import Groq
 
 from config import GROQ_API_KEY, LLM_MODEL_SYNTHESIS, RISK_MEMO_CHUNKS_PER_SECTION, RISK_MEMO_MAX_OUTPUT_TOKENS
-from src.rag.retriever import retrieve
 
 client = Groq(api_key=GROQ_API_KEY)
 
@@ -45,16 +50,25 @@ def _format_chunks(chunks: list[dict]) -> str:
     return "\n\n".join(c["text"] for c in chunks)
 
 
-def generate_risk_memo(ticker: str) -> dict:
+def generate_risk_memo(ticker: str, retrieve_fn=None) -> dict:
     """Retrieves top chunks for risk_factors and mda sections, then asks
     Claude to synthesize a structured memo. Returns a parsed dict — raises
     if the model doesn't return valid JSON, on purpose, so a bad memo
-    fails loudly during the pipeline run rather than silently shipping."""
-    risk_chunks = retrieve(
+    fails loudly during the pipeline run rather than silently shipping.
+
+    retrieve_fn: optional callable matching src.rag.retriever.retrieve's
+    signature (query, ticker=, section=, top_k=) -> list[dict]. Defaults
+    to the real Chroma-backed retriever, imported lazily here (not at
+    module level) so this module stays importable without chromadb
+    installed — the on-demand pipeline never needs it at all."""
+    if retrieve_fn is None:
+        from src.rag.retriever import retrieve as retrieve_fn
+
+    risk_chunks = retrieve_fn(
         "key business and operational risks", ticker=ticker, section="risk_factors",
         top_k=RISK_MEMO_CHUNKS_PER_SECTION,
     )
-    mda_chunks = retrieve(
+    mda_chunks = retrieve_fn(
         "financial performance trends and outlook", ticker=ticker, section="mda",
         top_k=RISK_MEMO_CHUNKS_PER_SECTION,
     )

@@ -48,7 +48,6 @@ SEC_ARCHIVES_BASE = "https://www.sec.gov/Archives/edgar/data"
 # each one against https://www.sec.gov/cgi-bin/browse-edgar before the
 # first real pipeline run; a wrong CIK returns an empty filing list rather
 # than an obvious error.
-
 COMPANIES = {
     # ticker: {"cik": "0000000000", "name": "...", "sector": "..."}
     "JPM":  {"cik": "0000019617", "name": "JPMorgan Chase & Co.", "sector": "financials"},
@@ -76,7 +75,6 @@ CHUNK_OVERLAP_TOKENS = 100
 # It serves open-weight models (Llama, etc.) via an OpenAI-compatible API.
 # Sign up at https://console.groq.com (email or Google, no card) and create
 # a key under API Keys.
-
 GROQ_API_KEY = os.environ.get("GROQ_API_KEY", "")
 # Switched from llama-3.3-70b-versatile to llama-3.1-8b-instant after
 # hitting its free-tier DAILY cap (100,000 tokens/day, separate from and

@@ -1,21 +1,57 @@
-# FilingLens
+# 🔍 FilingLens
 
-Agentic RAG system over real SEC 10-K filings. Retrieves grounded chunks
-from Risk Factors / MD&A sections to generate a structured risk memo per
-company, and cross-checks management's narrative claims in MD&A against
-actual XBRL-reported financials to flag inconsistencies — each flag is
-deterministically checked against the real computed ratios before being
-labeled "verified," not just trusted at the model's own word. A live
-`/analyze` endpoint also runs this pipeline on demand for any US-listed
-ticker, not just a fixed pre-baked list.
+[![Live Demo](https://img.shields.io/badge/Live%20Demo-filing--lens--ruby.vercel.app-14171F?style=for-the-badge)](https://filing-lens-ruby.vercel.app/)
+[![API Docs](https://img.shields.io/badge/API%20Docs-filinglens--2wqv.onrender.com-2F6F62?style=for-the-badge)](https://filinglens-2wqv.onrender.com/docs)
 
-> **Status:** fully working end-to-end across 8 pre-baked companies (JPM,
-> GS, PYPL, XYZ/Block, AAPL, MSFT, CRM, ADBE), plus a live on-demand
-> analysis path for any other ticker. Deployed: backend on Render,
-> frontend on Vercel. This is an early-stage prototype, built and
-> iterated on a $0 infrastructure budget — see "Known limitations" and
-> the deployment notes below for the honest trade-offs that come with
-> that constraint.
+![Python](https://img.shields.io/badge/Python-3.x-3776AB?style=flat&logo=python&logoColor=white)
+![FastAPI](https://img.shields.io/badge/FastAPI-Backend-009688?style=flat&logo=fastapi&logoColor=white)
+![Groq](https://img.shields.io/badge/Groq-LLM-F55036?style=flat&logo=groq&logoColor=white)
+![ChromaDB](https://img.shields.io/badge/ChromaDB-Vector%20Store-6E56CF?style=flat)
+![scikit-learn](https://img.shields.io/badge/scikit--learn-TF--IDF-F7931E?style=flat&logo=scikitlearn&logoColor=white)
+![Render](https://img.shields.io/badge/Backend-Render-46E3B7?style=flat&logo=render&logoColor=white)
+![Vercel](https://img.shields.io/badge/Frontend-Vercel-000000?style=flat&logo=vercel&logoColor=white)
+
+**Agentic RAG system over real SEC 10-K filings** — retrieves grounded
+text from Risk Factors / MD&A sections to generate a structured risk
+memo per company, then cross-checks management's narrative claims
+against actual XBRL-reported financials to flag inconsistencies. Every
+flag is checked in code against real computed ratios before being
+labeled "verified" — never just trusted at the model's own word. A live
+`/analyze` endpoint runs this whole pipeline on demand for any
+US-listed ticker, not just a fixed pre-baked list.
+
+> **Status:** fully working end-to-end — 8 pre-baked companies (JPM, GS,
+> PYPL, XYZ/Block, AAPL, MSFT, CRM, ADBE) plus live on-demand analysis
+> for any other ticker. Backend on Render, frontend on Vercel, both
+> live. This is an early-stage prototype, built and iterated on a **$0
+> infrastructure budget** — see "Known limitations" and "Roadmap" below
+> for the honest trade-offs that come with that, and what a small
+> hosting budget would unlock.
+
+## What it actually does
+
+- **Reads real SEC 10-K filings** — not summaries, not press releases —
+  pulled live from SEC EDGAR's public API.
+- **Generates a structured risk memo per company** — top risks ranked
+  by severity, management tone, notable red flags — grounded only in
+  retrieved filing text, not the model's general knowledge.
+- **Independently verifies the narrative against the numbers.** A
+  deterministic (non-LLM) layer computes real financial ratios from SEC
+  XBRL data, and every "inconsistency" flag the model raises is checked
+  against those real numbers before it's allowed to say "verified."
+  Ungrounded claims get caught and downgraded automatically — see
+  `_enforce_grounding` in `src/agent/consistency_checker.py`.
+- **Works live for any company, not just a fixed list.** Type any
+  US-listed ticker into the "Analyze a Company" tab and get a real
+  memo generated in ~15 seconds, end to end.
+- **Cross-company Portfolio View** — revenue growth, net income growth,
+  and narrative-reliability comparisons across the whole docket on one
+  screen.
+
+## Screenshots
+
+*(add 2-3 screenshots here — Company Memo view, Portfolio View, and the
+Analyze tab all look good and show different parts of the project)*
 
 ## Quickstart (local)
 
@@ -32,6 +68,19 @@ uvicorn src.api.main:app --reload  # serves the API at http://127.0.0.1:8000/doc
 
 Then open `frontend/index.html` directly in a browser (no server needed
 for the frontend — it's a static file that fetches from the API above).
+
+## Tech stack
+
+| Layer | Technology |
+|---|---|
+| Data sources | SEC EDGAR (10-K full text), SEC XBRL `companyfacts` API |
+| Retrieval (pre-baked companies) | sentence-transformers embeddings + ChromaDB |
+| Retrieval (on-demand companies) | scikit-learn TF-IDF, in-memory, per request |
+| LLM | Groq (`llama-3.1-8b-instant`), free tier |
+| Backend | Python, FastAPI |
+| Frontend | Vanilla HTML/CSS/JS — no framework, no build step |
+| Testing | pytest, 22 tests covering ratio math, grounding logic, API error mapping, and on-demand pipeline wiring |
+| Deployment | Render (backend), Vercel (frontend) — both free tier |
 
 ## Why SEC EDGAR instead of NSE/BSE
 
@@ -157,6 +206,9 @@ natural next steps are:
 
 ## Deployment
 
+Backend on Render, frontend on Vercel — same pattern as two other shipped
+projects (a Flask/Postgres marketplace app and a quant risk dashboard).
+
 **Backend (Render):**
 1. Push this repo to GitHub. `data/processed/` and `data/chroma_db/` are
    committed on purpose (not gitignored) — Render serves cached memos and
@@ -187,6 +239,19 @@ natural next steps are:
 2. No build step needed — it's a static HTML file.
 3. After the Render backend URL is live, update `RENDER_API_URL` near the
    top of `frontend/index.html`'s `<script>` block and redeploy.
+
+## Testing
+
+```bash
+pytest tests/ -v
+```
+
+22 tests covering: deterministic ratio math (revenue/margin/net-income
+growth calculations), the consistency-grounding filter (including a test
+modeled directly on a real bug caught during development — see commit
+history), the on-demand pipeline's orchestration wiring (mocked SEC/Groq
+calls, verifying the right functions are called with the right
+arguments), and API-level error mapping (404/429/503 responses).
 
 ## License
 

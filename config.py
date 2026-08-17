@@ -14,7 +14,7 @@ from dotenv import load_dotenv
 
 # Loads .env into the process environment. Without this call, everything
 # below silently reads empty strings via os.environ.get() — this was
-# missing in the original scaffold, which is exactly why the Groq calls
+# missing in the orfiginal scaffold, which is exactly why the Groq calls
 # failed with a connection error even after the key was set in .env.
 load_dotenv()
 
@@ -87,7 +87,7 @@ GROQ_API_KEY = os.environ.get("GROQ_API_KEY", "")
 # for a 2-day build; verify current per-model limits at
 # console.groq.com/settings/limits before relying on this for anything
 # beyond this project.
-LLM_MODEL_SYNTHESIS = "llama-3.1-8b-instant"
+LLM_MODEL_SYNTHESIS = "llama-3.3-70b-versatile"  # was 70B, then 8B after hitting the 70B daily cap
 
 # Chunk/output budgets, sized conservatively (well under even the
 # per-minute cap reported for this model, not just the daily one) so the

@@ -150,7 +150,7 @@ def check_consistency(ticker: str, xbrl_facts: dict, retrieve_fn=None) -> dict:
 
     response = client.chat.completions.create(
         model=LLM_MODEL_SYNTHESIS,
-        max_tokens=1000,
+        max_tokens=2048,
         messages=[{"role": "user", "content": prompt}],
         response_format={"type": "json_object"},
     )

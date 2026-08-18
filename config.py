@@ -104,7 +104,7 @@ LLM_MODEL_SYNTHESIS = "openai/gpt-oss-20b"
 # each RAG module, so the whole retrieval budget can be tuned in one place
 # if limits change again.
 RISK_MEMO_CHUNKS_PER_SECTION = 2  # was 4, then originally 8 — trimmed further for the smaller model's tighter per-minute cap
-RISK_MEMO_MAX_OUTPUT_TOKENS = 700  # was 900, then 1500
+RISK_MEMO_MAX_OUTPUT_TOKENS = 2048  # was 900, then 1500
 CONSISTENCY_CHECK_MDA_CHUNKS = 4  # was 8 — same reasoning
 QUERY_ENDPOINT_CHUNKS = 6  # ad-hoc /query calls — already small, left as-is
 

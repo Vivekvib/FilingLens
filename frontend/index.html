@@ -1014,6 +1014,31 @@
 
   async function loadPortfolioView() {
     const container = document.getElementById("portfolio-view");
+
+    // Real bug this guards against: if the user switches to this tab
+    // before the initial GET /companies has resolved (e.g. during a slow
+    // Render cold-start), companiesCache is still empty — without this
+    // check, the section titles/legend render fine but every row list
+    // silently comes out empty, which looks broken rather than loading.
+    if (companiesCache.length === 0) {
+      container.innerHTML = `
+        <div class="memo-error">
+          Company list hasn't loaded yet — this can happen if the free-tier server was still waking up.
+          <div style="margin-top:10px;"><button id="portfolio-retry" class="query-submit">Retry</button></div>
+        </div>
+      `;
+      document.getElementById("portfolio-retry").addEventListener("click", async () => {
+        container.innerHTML = `<div class="memo-empty">Retrying…</div>`;
+        try {
+          companiesCache = await fetchJSON("/companies");
+          loadPortfolioView();
+        } catch (e) {
+          container.innerHTML = `<div class="memo-error">Still couldn't reach the API. Try refreshing the whole page.</div>`;
+        }
+      });
+      return;
+    }
+
     container.innerHTML = `<div class="memo-empty">Loading comparison across ${companiesCache.length} companies…</div>`;
 
     // Fetch every company's consistency check in parallel. A missing file
@@ -1093,12 +1118,32 @@
   }
 
   async function loadCompanies() {
+    // Render's free tier spins down after inactivity — the first request
+    // after idle can take 30-60s to wake back up. Rather than leave the
+    // docket looking frozen with no explanation, show an honest message
+    // if the request is taking a while (not on every normal-speed load).
+    const wakingUpTimer = setTimeout(() => {
+      docketList.innerHTML = `
+        <div style="padding:16px; color:var(--muted); font-style:italic; font-size:0.82rem; line-height:1.5;">
+          Waking up the server — this runs on free hosting and can take up to a minute after a period of inactivity. Thanks for your patience.
+        </div>
+      `;
+    }, 2500);
+
     try {
       companiesCache = await fetchJSON("/companies");
     } catch (e) {
-      docketList.innerHTML = `<div class="memo-error" style="padding:16px;">Can't reach the API at ${API_BASE} — is uvicorn running?</div>`;
+      clearTimeout(wakingUpTimer);
+      docketList.innerHTML = `
+        <div class="memo-error" style="padding:16px;">
+          Couldn't load the company list. If this is the live deployed site, the free-tier server may still be waking up — try the button below.
+          <div style="margin-top:10px;"><button id="companies-retry" class="query-submit">Retry</button></div>
+        </div>
+      `;
+      document.getElementById("companies-retry").addEventListener("click", loadCompanies);
       return;
     }
+    clearTimeout(wakingUpTimer);
 
     docketList.innerHTML = "";
     companiesCache.forEach(c => {

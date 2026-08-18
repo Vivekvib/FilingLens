@@ -14,7 +14,7 @@ from dotenv import load_dotenv
 
 # Loads .env into the process environment. Without this call, everything
 # below silently reads empty strings via os.environ.get() — this was
-# missing in the orfiginal scaffold, which is exactly why the Groq calls
+# missing in the original scaffold, which is exactly why the Groq calls
 # failed with a connection error even after the key was set in .env.
 load_dotenv()
 
@@ -76,18 +76,26 @@ CHUNK_OVERLAP_TOKENS = 100
 # Sign up at https://console.groq.com (email or Google, no card) and create
 # a key under API Keys.
 GROQ_API_KEY = os.environ.get("GROQ_API_KEY", "")
-# Switched from llama-3.3-70b-versatile to llama-3.1-8b-instant after
-# hitting its free-tier DAILY cap (100,000 tokens/day, separate from and
-# lower than its per-minute cap — a full 8-company pipeline run needs
-# ~125K+ tokens, over budget even with zero retries). Each Groq model has
-# its OWN separate quota bucket, so switching models is also the immediate
-# unblock — no need to wait out the 70b cooldown. 8B's free-tier daily
-# allowance is reported to be substantially larger (smaller model = cheaper
-# to serve). Quality trade-off: less nuanced reasoning than 70B, acceptable
-# for a 2-day build; verify current per-model limits at
-# console.groq.com/settings/limits before relying on this for anything
-# beyond this project.
-LLM_MODEL_SYNTHESIS = "llama3-70b-8192"  # was 70B, then 8B after hitting the 70B daily cap
+# Model history, for whoever reads this next:
+#   1. llama-3.3-70b-versatile (original) -> hit its 100K tokens/day free
+#      cap mid-build.
+#   2. llama-3.1-8b-instant -> worked for months, then Groq deprecated it
+#      (along with llama-3.3-70b-versatile) on 08/16/26, announced via
+#      email 06/17/26. Requests started failing with
+#      "model_decommissioned" errors.
+#   3. A stopgap attempt at llama3-70b-8192 (no dots, old naming) also
+#      failed — that model was ALREADY deprecated back on 08/30/25, over
+#      a year earlier; it was never a valid fallback.
+#   4. openai/gpt-oss-20b — Groq's official recommended replacement for
+#      llama-3.1-8b-instant (see console.groq.com/docs/deprecations).
+#      Supports response_format={"type": "json_object"}, the same JSON
+#      mode already used in risk_memo_generator.py and
+#      consistency_checker.py — no other code changes needed.
+# Lesson: hardcoding a specific model ID is inherently a maintenance
+# liability on a platform that actively deprecates models. If this
+# breaks again, check console.groq.com/docs/deprecations first — the
+# error message itself also names the exact recommended replacement.
+LLM_MODEL_SYNTHESIS = "openai/gpt-oss-20b"
 
 # Chunk/output budgets, sized conservatively (well under even the
 # per-minute cap reported for this model, not just the daily one) so the

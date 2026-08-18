@@ -78,7 +78,7 @@ for the frontend — it's a static file that fetches from the API above).
 | Data sources | SEC EDGAR (10-K full text), SEC XBRL `companyfacts` API |
 | Retrieval (pre-baked companies) | sentence-transformers embeddings + ChromaDB |
 | Retrieval (on-demand companies) | scikit-learn TF-IDF, in-memory, per request |
-| LLM | Groq (`llama-3.1-8b-instant`), free tier |
+| LLM | Groq (`openai/gpt-oss-20b`), free tier |
 | Backend | Python, FastAPI |
 | Frontend | Vanilla HTML/CSS/JS — no framework, no build step |
 | Testing | pytest, 22 tests covering ratio math, grounding logic, API error mapping, and on-demand pipeline wiring |
@@ -95,7 +95,7 @@ in scope for this build.
 
 ## Why Groq instead of a paid API
 
-The synthesis LLM is Groq's free tier (`llama-3.1-8b-instant`), not a
+The synthesis LLM is Groq's free tier (`openai/gpt-oss-20b`), not a
 paid API — this was a deliberate zero-budget constraint, not a fallback.
 Trade-off: less nuanced reasoning than a larger model, which is exactly
 why the consistency checker treats the LLM's own confidence label as

@@ -52,6 +52,7 @@ US-listed ticker, not just a fixed pre-baked list.
 
 <img width="1889" height="872" alt="image" src="https://github.com/user-attachments/assets/02b486bb-e7a4-4f18-8969-29b8246baf21" />
 <img width="1907" height="658" alt="image" src="https://github.com/user-attachments/assets/baabfa27-5b90-4548-9a8f-0c623ef5c786" />
+<img width="1902" height="813" alt="image" src="https://github.com/user-attachments/assets/edeedeb5-9d96-490f-b33f-fc31b9cc10e0" />
 
 
 ## Quickstart (local)
